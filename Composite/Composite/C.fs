@@ -12,7 +12,7 @@ module C =
     let Ana (scn: IEnumerable<Func<'a, 'b>>) (obj: 'a Composite ) =
 
         let scenario = scn |> List.ofSeq
-                           |> List.map (fun x -> x.Invoke )
+                           |> List.map (fun x -> x.Invoke)
         ana scenario obj
         
     let Value (obj:'a) =

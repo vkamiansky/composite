@@ -4,6 +4,18 @@ open Composite.DataTypes
 
 module Transforms =
 
+    let toForest comp =
+        match comp with
+        | Composite x -> x
+        | x -> seq { yield x }
+
+    let rec toFlat comp =
+       seq {
+           match comp with
+               | Value x -> yield x
+               | Composite x -> yield! (Seq.collect (fun c -> (toFlat c)) x)
+       }
+
     let private toComposite obj =
         match Seq.tryHead obj with
         | None -> failwith "Empty data sequence will not lead to a meaningful Composite instance."
@@ -13,7 +25,7 @@ module Transforms =
                     | Some y -> Composite(seq {
                                               yield Value x
                                               yield Value y
-                                              yield! Seq.map Value (Seq.tail obj2)
+                                              yield! (Seq.tail obj2) |> Seq.map Value
                                            })
 
     let rec ana scn obj =
@@ -21,7 +33,7 @@ module Transforms =
         | [] -> obj
         | f :: scn_tail -> match obj with
                            | Value x -> ana scn_tail (toComposite(f x))
-                           | Composite x -> Composite(Seq.map (ana scn) x)
+                           | Composite x -> Composite(x |> Seq.map (ana scn))
                            
 //    let v f obj =
 //        match f obj with
@@ -60,7 +72,7 @@ module Transforms =
               seq {
                match Seq.tryHead x with
                | None -> yield! Seq.empty
-               | Some head -> match update_results f (Seq.head x) with
+               | Some head -> match update_results f head with
                               | (frames_new, results_new) -> yield! results_new
                                                              yield! get_results frames_new (Seq.tail x)
               }
