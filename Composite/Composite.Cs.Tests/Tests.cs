@@ -10,6 +10,22 @@ using SimpleComposite = Composite.DataTypes.Composite<Composite.Cs.Tests.Tests.S
 
 namespace Composite.Cs.Tests {
 
+    public static class EnumerableExtensions{
+        public static IEnumerable<T> AsLimitedEnumerable<T>(this T[] source, int limit)
+        {
+            int i = 0;
+            while(true){
+
+                if(i<limit) {
+                    yield return source[i];
+                    i++;
+                } else {
+                    throw new Exception("You've attempted to walk through an infinite sequence.");
+                }
+            }
+        }
+    }
+
     public class Tests {
 
         public class Simple {
@@ -17,7 +33,25 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
-        public void UnfoldTest () {
+        public void ToForestTest(){
+            var obj = C.Composite (new [] {
+                C.Value(new Simple { Number = 2, }),
+                C.Composite(new [] {
+                    C.Value( new Simple { Number = 1, } ),
+                    C.Value( new Simple { Number = 6, } ),
+                }),
+                C.Value(new Simple { Number = 2, }),
+            }.AsLimitedEnumerable(2));
+
+            C.ToForest(obj).Take(2).ToArray();
+
+            Assert.Throws<Exception>(() => {
+                C.ToForest(obj).Take(3).ToArray();
+            });
+        }
+
+        [Fact]
+        public void AnaTest () {
             var scn = new Func<Simple, Simple[]>[] {
                     x => x.Number == 1
                         ? new [] { new Simple { Number = 2, }, new Simple { Number = 3, }}
@@ -28,8 +62,8 @@ namespace Composite.Cs.Tests {
                 };
 
             var obj = C.Composite (new [] {
-                new Simple { Number = 1, },
-                new Simple { Number = 6, },
+                C.Value( new Simple { Number = 1, } ),
+                C.Value( new Simple { Number = 6, } ),
             });
 
             var result = C.Ana (scn, obj);
