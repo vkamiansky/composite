@@ -13,32 +13,23 @@ namespace Composite.Cs.Tests {
     public class Tests {
 
         public class Simple {
-            public string Name { get; set; }
+            public int Number { get; set; }
         }
 
         [Fact]
         public void UnfoldTest () {
-            const string Alice = "Alice";
-            const string Bob = "Bob";
-
             var scn = new Func<Simple, Simple[]>[] {
-                    x => {
-                        if (x.Name.Equals (Alice, StringComparison.InvariantCulture)) {
-                            return new [] { new Simple { Name = "First", }, new Simple { Name = "Second", }, };
-                        }
-                        return new[]{x};
-                    },
-                    x => {
-                        if (x.Name.Equals ("First", StringComparison.InvariantCulture)) {
-                            return new [] { new Simple { Name = "Third", }, new Simple { Name = "Fourth", }, };
-                        }
-                        return new[]{x};
-                    },
+                    x => x.Number == 1
+                        ? new [] { new Simple { Number = 2, }, new Simple { Number = 3, }}
+                        : new[] { x },
+                    x => x.Number == 2
+                        ? new [] { new Simple { Number = 4, }, new Simple { Number = 5, }}
+                        : new[] { x },
                 };
 
             var obj = C.Composite (new [] {
-                new Simple { Name = Alice, },
-                new Simple { Name = Bob, },
+                new Simple { Number = 1, },
+                new Simple { Number = 6, },
             });
 
             var result = C.Ana (scn, obj);

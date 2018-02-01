@@ -4,24 +4,36 @@ open Composite.DataTypes
 
 module Transforms =
 
-    let private toComposite obj =
-        match Seq.tryHead obj with
+    let toForest inComp =
+        match inComp with
+        | Composite x -> x
+        | x -> seq { yield x }
+
+    let rec toFlat inComp =
+       seq {
+           match inComp with
+               | Value x -> yield x
+               | Composite x -> yield! x |> Seq.collect toFlat
+       }
+
+    let private toComposite inSeq =
+        match Seq.tryHead inSeq with
         | None -> failwith "Empty data sequence will not lead to a meaningful Composite instance."
-        | Some x -> let obj2 = Seq.tail obj
-                    match Seq.tryHead obj2 with
+        | Some x -> let inSeqTail = Seq.tail inSeq
+                    match Seq.tryHead inSeqTail with
                     | None -> Value x
                     | Some y -> Composite(seq {
                                               yield Value x
                                               yield Value y
-                                              yield! Seq.map Value (Seq.tail obj2)
+                                              yield! (Seq.tail inSeqTail) |> Seq.map Value
                                            })
 
-    let rec ana scn obj =
+    let rec ana scn inComp =
         match scn with
-        | [] -> obj
-        | f :: scn_tail -> match obj with
+        | [] -> inComp
+        | f :: scn_tail -> match inComp with
                            | Value x -> ana scn_tail (toComposite(f x))
-                           | Composite x -> Composite(Seq.map (ana scn) x)
+                           | Composite x -> Composite(x |> Seq.map (ana scn))
                            
 //    let v f obj =
 //        match f obj with
@@ -49,7 +61,7 @@ module Transforms =
         pre_results |> List.choose (function | (f, _) -> f),
         pre_results |> Seq.collect (function | (_, r) -> r)
 
-    let cata scn lst =
+    let cata scn inSeq =
         let frames_init = scn |> List.map (function 
                                            | (check_funcs, transform) -> (check_funcs, transform, check_funcs
                                                                                                   |> List.map (fun _ -> None)))
@@ -60,9 +72,9 @@ module Transforms =
               seq {
                match Seq.tryHead x with
                | None -> yield! Seq.empty
-               | Some head -> match update_results f (Seq.head x) with
+               | Some head -> match update_results f head with
                               | (frames_new, results_new) -> yield! results_new
                                                              yield! get_results frames_new (Seq.tail x)
               }
 
-        get_results frames_init lst
+        get_results frames_init inSeq
