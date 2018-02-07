@@ -51,6 +51,32 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
+        public void ToFlatTest(){
+            var obj = C.Composite (new [] {
+                C.Value(new Simple { Number = 1, }),
+                C.Composite(new [] {
+                    C.Value( new Simple { Number = 2, } ),
+                    C.Value( new Simple { Number = 3, } ),
+                    C.Composite(new [] {
+                        C.Value( new Simple { Number = 4, } ),
+                        C.Value( new Simple { Number = 5, } ),
+                    }.AsLimitedEnumerable(1)),
+                }),
+                C.Value(new Simple { Number = 6, }),
+            }.AsLimitedEnumerable(2));
+
+            var result = C.ToFlat(obj).Take(4).ToArray();
+            for(int i=1; i<=4; i++)
+            {
+                Assert.Equal(i, result[i-1].Number);
+            }
+
+            Assert.Throws<Exception>(() => {
+                C.ToFlat(obj).Take(5).ToArray();
+            });
+        }
+
+        [Fact]
         public void AnaTest () {
             var scn = new Func<Simple, Simple[]>[] {
                     x => x.Number == 1
