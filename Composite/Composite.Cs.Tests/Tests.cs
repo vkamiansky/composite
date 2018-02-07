@@ -77,6 +77,60 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
+        public void CataTest(){
+            var inputSeq = new[] {
+                new Simple { Number = 1 },
+                new Simple { Number = 2 },
+                new Simple { Number = 3 },
+                new Simple { Number = 4 },
+                new Simple { Number = 5 },
+                new Simple { Number = 6 },
+            }.AsLimitedEnumerable(5);
+            
+            var pickTransformPairs = new[] {
+                new C.PickTransformPair<Simple>(new Func<Simple, string>[]{
+                    (x) => x.Number == 5
+                            ? "1"
+                            : null,
+                }, (x) => {
+                        return x.ToArray()[0] == "1"
+                            ? new[]{ "2", "3", "4",}
+                            : new string[]{};
+                    }),
+            };
+
+            var result = C.Cata(pickTransformPairs, inputSeq).ToArray();
+        }
+
+        [Fact]
+        public void CataTestLazy(){
+            var inputSeq = new[] {
+                new Simple { Number = 1 },
+                new Simple { Number = 2 },
+                new Simple { Number = 3 },
+                new Simple { Number = 4 },
+                new Simple { Number = 5 },
+                new Simple { Number = 6 },
+            }.AsLimitedEnumerable(5);
+            
+            var pickTransformPairs = new[] {
+                new C.PickTransformPair<Simple>(new Func<Simple, string>[]{
+                    (x) => x.Number == 6
+                            ? "1"
+                            : null,
+                }, (x) => {
+                        return x.ToArray()[0] == "1"
+                            ? new[]{ "2", "3", "4",}
+                            : new string[]{};
+                    }),
+            };
+            
+            Assert.Throws<Exception>(() => {
+                C.Cata(pickTransformPairs, inputSeq).ToArray();
+            });
+        }
+
+        [Fact]
         public void AnaTest () {
             var scn = new Func<Simple, Simple[]>[] {
                     x => x.Number == 1
