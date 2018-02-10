@@ -9,26 +9,9 @@ using Composite;
 using SimpleComposite = Composite.DataTypes.Composite<Composite.Cs.Tests.Tests.Simple>.Composite;
 
 namespace Composite.Cs.Tests {
-
-    public static class EnumerableExtensions{
-        public static IEnumerable<T> AsLimitedEnumerable<T>(this T[] source, int limit)
-        {
-            int i = 0;
-            while(true){
-
-                if(i<limit) {
-                    yield return source[i];
-                    i++;
-                } else {
-                    throw new ArgumentOutOfRangeException("You've attempted to walk through an infinite sequence.");
-                }
-            }
-        }
-    }
-
     public class Tests {
 
-        public class Simple {
+        internal class Simple {
             public int Number { get; set; }
         }
 
@@ -42,7 +25,7 @@ namespace Composite.Cs.Tests {
                     C.Value( new Simple { Number = 6, } ),
                 }),
                 C.Value(new Simple { Number = 2, }),
-            }.AsLimitedEnumerable(2));
+            }.AsLimited(2));
 
             C.ToForest(obj).Take(2).ToArray();
 
@@ -62,10 +45,10 @@ namespace Composite.Cs.Tests {
                     C.Composite(new[] {
                         C.Value( new Simple { Number = 4, } ),
                         C.Value( new Simple { Number = 5, } ),
-                    }.AsLimitedEnumerable(1)),
+                    }.AsLimited(1)),
                 }),
                 C.Value(new Simple { Number = 6, }),
-            }.AsLimitedEnumerable(2));
+            }.AsLimited(2));
 
             var result = C.ToFlat(obj).Take(4).ToArray();
             for (var i = 1; i <= 4; i++)
@@ -88,7 +71,7 @@ namespace Composite.Cs.Tests {
                 new Simple { Number = 4 },
                 new Simple { Number = 5 },
                 new Simple { Number = 6 },
-            }.AsLimitedEnumerable(5);
+            }.AsLimited(5);
             
             var pickTransformPairs = new[] {
                 new C.PickTransformPair<Simple>(new Func<Simple, string>[]{
@@ -115,7 +98,7 @@ namespace Composite.Cs.Tests {
                 new Simple { Number = 4 },
                 new Simple { Number = 5 },
                 new Simple { Number = 6 },
-            }.AsLimitedEnumerable(5);
+            }.AsLimited(5);
             
             var pickTransformPairs = new[] {
                 new C.PickTransformPair<Simple>(new Func<Simple, string>[] {
@@ -172,7 +155,7 @@ namespace Composite.Cs.Tests {
             var limit = 2;
             
             var composite = C.Composite(new[] { value, value, value, }
-                .AsLimitedEnumerable(limit));
+                .AsLimited(limit));
 
             var result = C.Ana(new Func<Simple, Simple[]>[0], composite);
 
