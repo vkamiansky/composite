@@ -1,5 +1,6 @@
 namespace Composite
 
+open System.Threading
 open Composite.DataTypes
 
 module Transforms =
@@ -15,6 +16,28 @@ module Transforms =
                | Value x -> yield x
                | Composite x -> yield! x |> Seq.collect toFlat
        }
+
+    let toPartitioned numParts inSeq =
+        let lockObj = new obj ()
+
+        let mutable restOfSeq = inSeq
+
+        let getNext () =
+            Monitor.Enter lockObj
+            let res = restOfSeq |> Seq.tryHead
+            restOfSeq <- (restOfSeq |> Seq.tail)
+            Monitor.Exit lockObj
+            res
+
+        let getSeq () = 
+            seq {
+                    let mutable cur = getNext ()
+                    while cur |> Option.isSome do
+                        yield cur |> (function | Some x -> x | None -> failwith "Unexpected situation in enumeration.")
+                        cur <- getNext ()
+                }
+
+        Array.init numParts (fun _ -> getSeq ())
 
     let private toComposite inSeq =
         match Seq.tryHead inSeq with

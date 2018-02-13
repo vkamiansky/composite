@@ -23,8 +23,10 @@ module C =
     let ToFlat (inputComposite: 'a Composite) =
         Enumerable.AsEnumerable<'a>(toFlat inputComposite)
 
-    let Ana (scn: IEnumerable<Func<'a, 'b>>) (obj: 'a Composite ) =
+    let ToPartitioned (numberPartitions: int) (inputSequence: IEnumerable<'a>) =
+        toPartitioned numberPartitions inputSequence |> Array.map Enumerable.AsEnumerable
 
+    let Ana (scn: IEnumerable<Func<'a, 'b>>) (obj: 'a Composite ) =
         let scenario = scn |> List.ofSeq
                            |> List.map (fun x -> x.Invoke)
         ana scenario obj
