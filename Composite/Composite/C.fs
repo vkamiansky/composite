@@ -18,13 +18,16 @@ module C =
         member this.TransformFunction: Func<IEnumerable<'b>, IEnumerable<'c>> when 'b:null = transformFunction
 
     let ToForest (inputComposite: 'a Composite) =
-        Enumerable.AsEnumerable<'a Composite>(toForest inputComposite)
+        Enumerable.AsEnumerable(toForest inputComposite)
 
     let ToFlat (inputComposite: 'a Composite) =
-        Enumerable.AsEnumerable<'a>(toFlat inputComposite)
+        Enumerable.AsEnumerable(toFlat inputComposite)
 
     let ToPartitioned (numberPartitions: int) (inputSequence: IEnumerable<'a>) =
         toPartitioned numberPartitions inputSequence |> Array.map Enumerable.AsEnumerable
+
+    let ToPaged (pageSize: int) (inputSequence: IEnumerable<'a>) =
+        Enumerable.AsEnumerable(toPaged pageSize inputSequence)
 
     let Ana (scn: IEnumerable<Func<'a, 'b>>) (obj: 'a Composite ) =
         let scenario = scn |> List.ofSeq

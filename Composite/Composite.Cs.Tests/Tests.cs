@@ -16,6 +16,19 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
+        public void ToPagedTest () {
+            var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
+            var pages = C.ToPaged(2, inputSequence).Take(3).ToArray();
+
+            Assert.Equal(1, pages[0][0]);
+            Assert.Equal(2, pages[0][1]);
+            Assert.Equal(3, pages[1][0]);
+            Assert.Equal(4, pages[1][1]);
+            Assert.Equal(5, pages[2][0]);
+            Assert.Equal(6, pages[2][1]);
+        }
+
+        [Fact]
         public void ToPartitionedTest () {
             var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
             var partitions = C.ToPartitioned(3, inputSequence);
