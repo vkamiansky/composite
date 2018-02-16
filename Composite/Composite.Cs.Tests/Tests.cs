@@ -17,7 +17,7 @@ namespace Composite.Cs.Tests {
 
         [Fact]
         public void ToPartitionedTest () {
-            var inputSequence = Enumerable.Range(1, 10);
+            var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
             var partitions = C.ToPartitioned(3, inputSequence);
 
             var arr1 = partitions[0].Take(2).ToArray();
