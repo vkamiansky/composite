@@ -12,10 +12,10 @@ module Transforms =
 
     let rec toFlat inComp =
        seq {
-           match inComp with
+            match inComp with
                | Value x -> yield x
                | Composite x -> yield! x |> Seq.collect toFlat
-       }
+        }
 
     let toPartitioned numParts inSeq =
         let lockObj = new obj ()
@@ -35,9 +35,26 @@ module Transforms =
                     while cur |> Option.isSome do
                         yield cur |> (function | Some x -> x | None -> failwith "Unexpected situation in enumeration.")
                         cur <- getNext ()
-                }
+            }
 
         Array.init numParts (fun _ -> getSeq ())
+
+    let toPaged pageSize inSeq =
+        let rec getPageAndRest numRemains pageAndRest = 
+            match numRemains > 0, pageAndRest with
+            | true, (p, r) -> match r |> Seq.tryHead with
+                                | Some h -> getPageAndRest (numRemains-1) (Array.append p [|h|], r |> Seq.tail)
+                                | None -> pageAndRest
+            | false, pr -> pr
+
+        let rec getPages inSeq2 =
+            seq {
+                    match getPageAndRest pageSize ([||], inSeq2) with
+                    | [||], _ -> yield! []
+                    | p, r -> yield p
+                              yield! getPages r
+            }
+        getPages inSeq
 
     let private toComposite inSeq =
         match Seq.tryHead inSeq with
