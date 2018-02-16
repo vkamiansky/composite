@@ -16,6 +16,23 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
+        public void ToPartitionedTest () {
+            var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
+            var partitions = C.ToPartitioned(3, inputSequence);
+
+            var arr1 = partitions[0].Take(2).ToArray();
+            var arr2 = partitions[1].Take(2).ToArray();
+            var arr3 = partitions[2].Take(2).ToArray();
+
+            Assert.Equal(1, arr1[0]);
+            Assert.Equal(2, arr1[1]);
+            Assert.Equal(3, arr2[0]);
+            Assert.Equal(4, arr2[1]);
+            Assert.Equal(5, arr3[0]);
+            Assert.Equal(6, arr3[1]);
+        }
+
+        [Fact]
         public void ToForestTest(){
             var obj = C.Composite (new [] {
                 C.Value(new Simple { Number = 2, }),
@@ -28,7 +45,7 @@ namespace Composite.Cs.Tests {
 
             C.ToForest(obj).Take(2).ToArray();
 
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<InvalidOperationException>(() => {
                 C.ToForest(obj).Take(3).ToArray();
             });
         }
@@ -54,7 +71,7 @@ namespace Composite.Cs.Tests {
                 Assert.Equal(i, result[i-1].Number);
             }
 
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<InvalidOperationException>(() => {
                 C.ToFlat(obj).Take(5).ToArray();
             });
         }
@@ -108,7 +125,7 @@ namespace Composite.Cs.Tests {
                     }),
             };
             
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<InvalidOperationException>(() => {
                 C.Cata(pickTransformPairs, inputSeq).ToArray();
             });
         }
