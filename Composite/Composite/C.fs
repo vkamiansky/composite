@@ -30,12 +30,12 @@ module C =
         let scenario = scn |> List.ofSeq
                            |> List.map (fun x -> x.Invoke)
         ana scenario obj
-        
-    let Value (obj:'a) =
-        Value obj
 
-    let Composite (obj: IEnumerable<'a>) =
-        Composite (obj |> Seq.map Composite.Value)
+    let Composite (inputSequence: IEnumerable<'a>) =
+        Composite inputSequence
+
+    let Value value =
+        Value value
 
     let Cata (scenario: IEnumerable<PickTransformPair<'a>>)
              (inputSequence: IEnumerable<'a>) =
