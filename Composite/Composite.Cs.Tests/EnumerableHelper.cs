@@ -14,7 +14,7 @@ namespace Composite.Cs.Tests {
                     yield return source[i];
                     i++;
                 } else {
-                    throw new ArgumentOutOfRangeException("You've attempted to walk through an infinite sequence.");
+                    throw new InvalidOperationException("You've attempted to walk through an infinite sequence.");
                 }
             }
         }
