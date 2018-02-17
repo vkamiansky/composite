@@ -16,6 +16,23 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
+        public void ToBatchedTest () {
+            var inputSequence = Enumerable.Range(1, 10)
+                .Select(x => new Simple{ Number = x, })
+                .AsLimited(6);
+            var batches = C.ToBatched(10, x=>x.Number,  inputSequence)
+                .Take(2)
+                .ToArray();
+
+            Assert.Equal(1, batches[0][0].Number);
+            Assert.Equal(2, batches[0][1].Number);
+            Assert.Equal(3, batches[0][2].Number);
+            Assert.Equal(4, batches[0][3].Number);
+            Assert.Equal(5, batches[1][0].Number);
+            Assert.Equal(6, batches[1][1].Number);
+        }
+
+        [Fact]
         public void ToPagedTest () {
             var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
             var pages = C.ToPaged(2, inputSequence).Take(3).ToArray();

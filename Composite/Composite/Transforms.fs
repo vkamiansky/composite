@@ -56,6 +56,23 @@ module Transforms =
             }
         getPages inSeq
 
+    let toBatched batchSize getElemSize inSeq =
+        let rec getBatchAndRest numRemains pageAndRest = 
+            match numRemains > 0, pageAndRest with
+            | true, (p, r) -> match r |> Seq.tryHead with
+                                | Some h -> getBatchAndRest (numRemains-(getElemSize h)) (Array.append p [|h|], r |> Seq.tail)
+                                | None -> pageAndRest
+            | false, pr -> pr
+
+        let rec getBatches inSeq2 =
+            seq {
+                    match getBatchAndRest batchSize ([||], inSeq2) with
+                    | [||], _ -> yield! []
+                    | p, r -> yield p
+                              yield! getBatches r
+            }
+        getBatches inSeq
+
     let private toComposite inSeq =
         match Seq.tryHead inSeq with
         | None -> failwith "Empty data sequence will not lead to a meaningful Composite instance."

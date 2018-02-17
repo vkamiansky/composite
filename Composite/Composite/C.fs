@@ -29,12 +29,15 @@ module C =
     let ToPaged (pageSize: int) (inputSequence: IEnumerable<'a>) =
         Enumerable.AsEnumerable(toPaged pageSize inputSequence)
 
+    let ToBatched (pageSize: int) (getElementSize: Func<'a, int>) (inputSequence: IEnumerable<'a>) =
+        Enumerable.AsEnumerable(toBatched pageSize getElementSize.Invoke inputSequence)
+
     let Ana (scn: IEnumerable<Func<'a, 'b>>) (obj: 'a Composite ) =
         let scenario = scn |> List.ofSeq
                            |> List.map (fun x -> x.Invoke)
         ana scenario obj
 
-    let Composite (inputSequence: IEnumerable<'a>) =
+    let Composite (inputSequence: IEnumerable<'a Composite>) =
         Composite inputSequence
 
     let Value value =
