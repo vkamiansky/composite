@@ -45,19 +45,19 @@ type EnumerableExtensions () =
     [<Extension>]
     /// <summary>
     /// Splits the <c>source</c> enumerable into batches with total size of
-    /// each multiitem batch no greater than <c>batchSize</c>.
+    /// each multi-item batch no greater than <c>batchSize</c>.
     /// </summary>
     /// <param name="source">
     /// The source enumerable.
     /// </param>
     /// <param name="batchSize">
-    /// The maximum total size of a multiitem batch.
+    /// The maximum total size of a multi-item batch.
     /// </param>
     /// <param name="getElementSize">
     /// A function that calculates the size of an element.
     /// </param>
     /// <returns>
-    /// An enumerable of batches with multiitem batches of size no greater than
+    /// An enumerable of batches with multi-item batches of size no greater than
     /// <c>batchSize</c>.
     /// </returns>
     static member inline AsBatched (source: IEnumerable<'T>) (batchSize: int) (getElementSize: Func<'T, int>) =
