@@ -23,15 +23,6 @@ module C =
     let ToFlat (inputComposite: 'a Composite) =
         Enumerable.AsEnumerable(toFlat inputComposite)
 
-    let ToPartitioned (numberPartitions: int) (inputSequence: IEnumerable<'a>) =
-        toPartitioned numberPartitions inputSequence |> Array.map Enumerable.AsEnumerable
-
-    let ToPaged (pageSize: int) (inputSequence: IEnumerable<'a>) =
-        Enumerable.AsEnumerable(toPaged pageSize inputSequence)
-
-    let ToBatched (pageSize: int) (getElementSize: Func<'a, int>) (inputSequence: IEnumerable<'a>) =
-        Enumerable.AsEnumerable(toBatched pageSize getElementSize.Invoke inputSequence)
-
     let Ana (scn: IEnumerable<Func<'a, 'b>>) (obj: 'a Composite ) =
         let scenario = scn |> List.ofSeq
                            |> List.map (fun x -> x.Invoke)
