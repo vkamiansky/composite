@@ -16,10 +16,11 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
-        public void ToForestTest(){
-            var obj = C.Composite (new [] {
+        public void ToForestTest()
+        {
+            var obj = C.Composite (new[] {
                 C.Value(new Simple { Number = 2, }),
-                C.Composite(new [] {
+                C.Composite(new[] {
                     C.Value( new Simple { Number = 1, } ),
                     C.Value( new Simple { Number = 6, } ),
                 }),
@@ -28,19 +29,20 @@ namespace Composite.Cs.Tests {
 
             C.ToForest(obj).Take(2).ToArray();
 
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
                 C.ToForest(obj).Take(3).ToArray();
             });
         }
 
         [Fact]
-        public void ToFlatTest(){
-            var obj = C.Composite (new [] {
+        public void ToFlatTest()
+        {
+            var obj = C.Composite (new[] {
                 C.Value(new Simple { Number = 1, }),
-                C.Composite(new [] {
+                C.Composite(new[] {
                     C.Value( new Simple { Number = 2, } ),
                     C.Value( new Simple { Number = 3, } ),
-                    C.Composite(new [] {
+                    C.Composite(new[] {
                         C.Value( new Simple { Number = 4, } ),
                         C.Value( new Simple { Number = 5, } ),
                     }.AsLimited(1)),
@@ -49,18 +51,19 @@ namespace Composite.Cs.Tests {
             }.AsLimited(2));
 
             var result = C.ToFlat(obj).Take(4).ToArray();
-            for(int i=1; i<=4; i++)
+            for (var i = 1; i <= 4; i++)
             {
                 Assert.Equal(i, result[i-1].Number);
             }
 
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
                 C.ToFlat(obj).Take(5).ToArray();
             });
         }
 
         [Fact]
-        public void CataTest(){
+        public void CataTest()
+        {
             var inputSeq = new[] {
                 new Simple { Number = 1 },
                 new Simple { Number = 2 },
@@ -86,7 +89,8 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
-        public void CataTestLazy(){
+        public void CataTestLazy()
+        {
             var inputSeq = new[] {
                 new Simple { Number = 1 },
                 new Simple { Number = 2 },
@@ -97,34 +101,33 @@ namespace Composite.Cs.Tests {
             }.AsLimited(5);
             
             var pickTransformPairs = new[] {
-                new C.PickTransformPair<Simple>(new Func<Simple, string>[]{
+                new C.PickTransformPair<Simple>(new Func<Simple, string>[] {
                     (x) => x.Number == 6
                             ? "1"
                             : null,
-                }, (x) => {
-                        return x.ToArray()[0] == "1"
-                            ? new[]{ "2", "3", "4",}
-                            : new string[]{};
-                    }),
+                }, (x) => x.ToArray()[0] == "1"
+                            ? new[] { "2", "3", "4",}
+                            : new string[0]),
             };
             
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
                 C.Cata(pickTransformPairs, inputSeq).ToArray();
             });
         }
 
         [Fact]
-        public void AnaTest () {
+        public void AnaTest()
+        {
             var scn = new Func<Simple, Simple[]>[] {
-                    x => x.Number == 1
-                        ? new [] { new Simple { Number = 2, }, new Simple { Number = 3, }}
-                        : new[] { x },
-                    x => x.Number == 2
-                        ? new [] { new Simple { Number = 4, }, new Simple { Number = 5, }}
-                        : new[] { x },
-                };
+                x => x.Number == 1
+                    ? new[] { new Simple { Number = 2, }, new Simple { Number = 3, }}
+                    : new[] { x },
+                x => x.Number == 2
+                    ? new[] { new Simple { Number = 4, }, new Simple { Number = 5, }}
+                    : new[] { x },
+            };
 
-            var obj = C.Composite (new [] {
+            var obj = C.Composite (new[] {
                 C.Value( new Simple { Number = 1, } ),
                 C.Value( new Simple { Number = 6, } ),
             });
@@ -139,6 +142,35 @@ namespace Composite.Cs.Tests {
                 Assert.True(resultArray.Length == 2);
                 Assert.True(resultArray[0].IsComposite);
                 Assert.True(resultArray[1].IsValue);
+            }
+            else {
+                Assert.True(false);
+            }
+        }
+
+        [Fact]
+        public void AnaTestLazy()
+        {
+            var value = C.Value(new Simple());
+            var limit = 2;
+            
+            var composite = C.Composite(new[] { value, value, value, }
+                .AsLimited(limit));
+
+            var result = C.Ana(new Func<Simple, Simple[]>[0], composite);
+
+            Assert.True(result.IsComposite);
+
+            if (result is SimpleComposite compositeResult) {
+                
+                var enumerator = compositeResult.Item.GetEnumerator();
+                Assert.True(enumerator.MoveNext());
+
+                for(var i = 1; i < limit; i++) {
+                    Assert.True(enumerator.MoveNext());
+                }
+
+                Assert.Throws(typeof(ArgumentOutOfRangeException), () => enumerator.MoveNext());
             }
             else {
                 Assert.True(false);
