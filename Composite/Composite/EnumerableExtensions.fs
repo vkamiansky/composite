@@ -65,6 +65,27 @@ type EnumerableExtensions () =
 
     
     [<Extension>]
-    static member inline Cata (source: IEnumerable<'a>) (scenario: CheckTransformPair<'a, 'b>[]) =
+    /// <summary>
+    /// Selects arrays of values from <c>source</c>, transforms
+    /// them, and returns the results as an output enumerable.
+    /// </summary>
+    /// <param name="source">
+    /// The source enumerable.
+    /// </param>
+    /// <param name="scenario">
+    /// An array of selection and transformation rules.
+    /// </param>
+    /// <typeparam name="TSource">
+    /// The type of elements in the source enumerable.
+    /// </typeparam>
+    /// <typeparam name="TResult">
+    /// The type of elements in the result enumerable.
+    /// </typeparam>
+    /// <returns>
+    /// An enumerable of results produced from source elements
+    /// by using the specified selection and transformation 
+    /// scenario.
+    /// </returns>
+    static member inline Cata (source: IEnumerable<'TSource>) (scenario: CheckTransformRule<'TSource, 'TResult>[]) =
         let scn = scenario |> Array.map (fun p -> p.CheckFunctions |> Array.map (fun x -> x.Invoke) , p.TransformFunction.Invoke)
         cata scn source

@@ -123,8 +123,8 @@ namespace Composite.Cs.Tests
                 .Select(x => new Simple { Number = x, })
                 .AsLimited(5);
 
-            var checkTransformPairs = new[] {
-                new CheckTransformPair<Simple, string>(new Func<Simple, bool>[]{
+            var checkTransformRules = new[] {
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 5,
                 }, (x) => {
                     var num = x[0].Number;
@@ -132,7 +132,7 @@ namespace Composite.Cs.Tests
                 }),
             };
 
-            var result = inputSeq.Cata(checkTransformPairs).ToArray();
+            var result = inputSeq.Cata(checkTransformRules).ToArray();
         }
 
         [Fact]
