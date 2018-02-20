@@ -9,6 +9,7 @@
     <Compile Include="DataTypes.fs" />
     <Compile Include="Transforms.fs" />
     <Compile Include="CompositeExtensions.fs" />
+    <Compile Include="CheckTransformPair.fs"/>
     <Compile Include="EnumerableExtensions.fs" />
   </ItemGroup>
 

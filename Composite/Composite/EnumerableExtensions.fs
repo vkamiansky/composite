@@ -62,3 +62,9 @@ type EnumerableExtensions () =
     /// </returns>
     static member inline AsBatched (source: IEnumerable<'T>) (batchSize: int) (getElementSize: Func<'T, int>) =
         Enumerable.AsEnumerable(toBatched batchSize getElementSize.Invoke source)
+
+    
+    [<Extension>]
+    static member inline Cata (source: IEnumerable<'a>) (scenario: CheckTransformPair<'a, 'b>[]) =
+        let scn = scenario |> Array.map (fun p -> p.CheckFunctions |> Array.map (fun x -> x.Invoke) , p.TransformFunction.Invoke)
+        cata scn source

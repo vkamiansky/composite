@@ -119,58 +119,20 @@ namespace Composite.Cs.Tests
         [Fact]
         public void CataTest()
         {
-            var inputSeq = new[] {
-                new Simple { Number = 1 },
-                new Simple { Number = 2 },
-                new Simple { Number = 3 },
-                new Simple { Number = 4 },
-                new Simple { Number = 5 },
-                new Simple { Number = 6 },
-            }.AsLimited(5);
+            var inputSeq = Enumerable.Range(1, 10)
+                .Select(x => new Simple { Number = x, })
+                .AsLimited(5);
 
-            var pickTransformPairs = new[] {
-                new C.PickTransformPair<Simple>(new Func<Simple, string>[]{
-                    (x) => x.Number == 5
-                            ? "1"
-                            : null,
+            var checkTransformPairs = new[] {
+                new CheckTransformPair<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 5,
                 }, (x) => {
-                        return x.ToArray()[0] == "1"
-                            ? new[]{ "2", "3", "4",}
-                            : new string[]{};
-                    }),
+                    var num = x[0].Number;
+                    return new[]{ num + "2", num + "3", num + "4",};
+                }),
             };
 
-            var result = C.Cata(pickTransformPairs, inputSeq).ToArray();
-        }
-
-        [Fact]
-        public void CataTestLazy()
-        {
-            var inputSeq = new[] {
-                new Simple { Number = 1 },
-                new Simple { Number = 2 },
-                new Simple { Number = 3 },
-                new Simple { Number = 4 },
-                new Simple { Number = 5 },
-                new Simple { Number = 6 },
-            }.AsLimited(5);
-
-            var pickTransformPairs = new[] {
-                new C.PickTransformPair<Simple>(new Func<Simple, string>[]{
-                    (x) => x.Number == 6
-                            ? "1"
-                            : null,
-                }, (x) => {
-                        return x.ToArray()[0] == "1"
-                            ? new[]{ "2", "3", "4",}
-                            : new string[]{};
-                    }),
-            };
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                C.Cata(pickTransformPairs, inputSeq).ToArray();
-            });
+            var result = inputSeq.Cata(checkTransformPairs).ToArray();
         }
 
         [Fact]

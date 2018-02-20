@@ -57,11 +57,11 @@ module Transforms =
         getPages inSeq
 
     let toBatched batchSize getElemSize inSeq =
-        let rec getBatchAndRest numRemains pageAndRest = 
-            match numRemains > 0, pageAndRest with
+        let rec getBatchAndRest numRemains batchAndRest = 
+            match numRemains > 0, batchAndRest with
             | true, (p, r) -> match r |> Seq.tryHead with
                                 | Some h -> getBatchAndRest (numRemains-(getElemSize h)) (Array.append p [|h|], r |> Seq.tail)
-                                | None -> pageAndRest
+                                | None -> batchAndRest
             | false, pr -> pr
 
         let rec getBatches inSeq2 =
@@ -90,48 +90,58 @@ module Transforms =
         | [] -> inComp
         | f :: scn_tail -> match inComp with
                            | Value x -> ana scn_tail (toComposite(f x))
-                           | Composite x -> Composite(x |> Seq.map (ana scn))
-                           
-//    let v f obj =
-//        match f obj with
-//        | Nil -> failwith "Empty data sequence is an invalid binding result."
-//        | Cons(x, Nil) -> if x = obj then ll x else [obj; x] |> LazyList.ofList
-//        | x -> LazyList.cons obj x
-
-    let private update_acc check_funcs acc obj =
-        let mapping f acc = 
-            match f, acc with
-            | f, None -> f obj
-            | _, res -> res
-
-        List.map2 mapping check_funcs acc
-
-    let private update_results frames obj =
-        let pre_results = frames
-                          |> List.map (function
-                                       | (check_funcs, transform, acc) ->
-                                            (let acc_new = update_acc check_funcs acc obj
-                                             match transform acc_new with
-                                             | [] -> (Some (check_funcs, transform, acc_new), [])
-                                             | r -> (None, r)))
-
-        pre_results |> List.choose (function | (f, _) -> f),
-        pre_results |> Seq.collect (function | (_, r) -> r)
+                           | Composite x -> Composite(x |> Seq.map (ana scn))                      
 
     let cata scn inSeq =
-        let frames_init = scn |> List.map (function 
-                                           | (check_funcs, transform) -> (check_funcs, transform, check_funcs
-                                                                                                  |> List.map (fun _ -> None)))
-        let rec get_results frames objs =
-            match frames, objs with
-            | [], _ -> Seq.empty
-            | f, x ->
-              seq {
-               match Seq.tryHead x with
-               | None -> yield! Seq.empty
-               | Some head -> match update_results f head with
-                              | (frames_new, results_new) -> yield! results_new
-                                                             yield! get_results frames_new (Seq.tail x)
-              }
+        // We initialize the frames
+        // Each frame contains:
+        // 1) an array of check functions;
+        //    The i-th function returns whether the seq element is fit to be i-th parameter
+        //    of the transform function
+        // 2) a transform function.
+        //    Once all the parameters are filled, the transform function will use them to
+        //    calculate its results and yield them to the output sequence. 
+        let framesInitial = scn |> Array.map (fun (checkFuncs, transform) -> checkFuncs, transform, (fun _ -> None) |> Array.init (checkFuncs |> Array.length))
 
-        get_results frames_init inSeq
+        // This function will examine the parameters accumulator
+        // for unfilled parameters and whenever it finds one
+        // it will do the following:
+        // - If the given object (obj) passes the check function for
+        //   the given parameter, use it as a new parameter value;
+        // - If the check is not passed, the parameter is skipped.
+        let checkAndUpdateAcc checkFuncs acc obj =
+            Array.map2 (fun f p -> (f, p) |> function | f, None -> (if (f obj) then Some obj else None) | _, p -> p) checkFuncs acc
+
+        // This function will use the frames to update their accumulators based on
+        // the value of obj and return frames with unfilled parameter accumulators
+        // and results produced by applying the respective transform functions
+        // to filled parameter accumulators.
+        let rec getFramesAndResults framesAndResults obj =
+            framesAndResults |> function 
+                                | [||], r -> [||], r
+                                | f, r -> f |> Array.head
+                                            |> function 
+                                               | (checkFuncs, transformFunc, acc) ->
+                                                    let accNew = checkAndUpdateAcc checkFuncs acc obj
+                                                    let (framesNew, resultsNew) = getFramesAndResults (f |> Array.tail, r) obj
+                                                    if accNew |> Array.exists (function | None -> true | _ -> false) then
+                                                        [|checkFuncs, transformFunc, accNew|] |> Array.append framesNew, resultsNew
+                                                        else
+                                                        let transformed = accNew |> Array.choose id |> transformFunc 
+                                                        framesNew, resultsNew |> Seq.append (transformed)
+
+        // This function gets frames and results for each object in the input sequence
+        // and yields the results to the output sequence
+        let rec getResults frames objs =
+            seq {
+                    match frames, objs with
+                    | [||], _ -> yield! []
+                    | f, x ->
+                       match Seq.tryHead x with
+                       | None -> yield! Seq.empty
+                       | Some head -> match getFramesAndResults (f, Seq.empty) head with
+                                      | (framesNew, resultsNew) ->  yield! resultsNew
+                                                                    yield! getResults framesNew (Seq.tail x)
+            }
+
+        getResults framesInitial inSeq
