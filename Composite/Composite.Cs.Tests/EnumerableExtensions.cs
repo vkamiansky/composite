@@ -10,7 +10,9 @@ namespace Composite.Cs.Tests
             var i = 0;
             foreach (var element in source)
                 if (i++ < limit) yield return element;
-                else throw new InvalidOperationException("You've attempted to walk through an infinite sequence.");
+                else throw new InvalidOperationException("You've attempted to iterate past the limit"
+                                                         + "designated for the maximum number of elements" 
+                                                         + "produced by this enumerable.");
         }
     }
 }
