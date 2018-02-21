@@ -6,18 +6,12 @@ using Xunit;
 
 using Composite;
 
-using SimpleComposite = Composite.DataTypes.Composite<Composite.Cs.Tests.Tests.Simple>.Composite;
+using SimpleComposite = Composite.DataTypes.Composite<Composite.Cs.Tests.Simple>.Composite;
 
 namespace Composite.Cs.Tests
 {
     public class Tests
     {
-
-        internal class Simple
-        {
-            public int Number { get; set; }
-        }
-
         [Fact]
         public void ToBatchedTest()
         {
@@ -114,25 +108,6 @@ namespace Composite.Cs.Tests
             {
                 C.ToFlat(obj).Take(5).ToArray();
             });
-        }
-
-        [Fact]
-        public void CataTest()
-        {
-            var inputSeq = Enumerable.Range(1, 10)
-                .Select(x => new Simple { Number = x, })
-                .AsLimited(5);
-
-            var checkTransformRules = new[] {
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
-                    (x) => x.Number == 5,
-                }, (x) => {
-                    var num = x[0].Number;
-                    return new[]{ num + "2", num + "3", num + "4",};
-                }),
-            };
-
-            var result = inputSeq.Cata(checkTransformRules).ToArray();
         }
 
         [Fact]
