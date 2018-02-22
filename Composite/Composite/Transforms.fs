@@ -2,6 +2,7 @@ namespace Composite
 
 open System.Threading
 open Composite.DataTypes
+open System
 
 module Transforms =
 
@@ -93,6 +94,11 @@ module Transforms =
                            | Composite x -> Composite(x |> Seq.map (ana scn))                      
 
     let cata scn inSeq =
+        if inSeq |> isNull then nullArg "inSeq"
+        if scn |> isNull then nullArg "scn"
+        if scn |> Array.isEmpty then invalidArg "scn" "Check-transform scenario must contain at least one rule."
+        if scn |> Array.exists (fun (funcs, _) -> funcs |> isNull || funcs |> Array.isEmpty) then invalidArg "scn" "A check-transform rule must contain at least one check function."
+
         // We initialize the frames
         // Each frame contains:
         // 1) an array of check functions;
