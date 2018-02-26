@@ -1,8 +1,6 @@
 namespace Composite
 
 open System.Threading
-open Composite.DataTypes
-open System
 
 module Transforms =
 
@@ -74,24 +72,23 @@ module Transforms =
             }
         getBatches inSeq
 
-    let private toComposite inSeq =
-        match Seq.tryHead inSeq with
-        | None -> failwith "Empty data sequence will not lead to a meaningful Composite instance."
-        | Some x -> let inSeqTail = Seq.tail inSeq
-                    match Seq.tryHead inSeqTail with
-                    | None -> Value x
-                    | Some y -> Composite(seq {
-                                              yield Value x
-                                              yield Value y
-                                              yield! (Seq.tail inSeqTail) |> Seq.map Value
-                                           })
-
     let rec ana scn inComp =
-        match scn with
-        | [] -> inComp
-        | f :: scn_tail -> match inComp with
-                           | Value x -> ana scn_tail (toComposite(f x))
-                           | Composite x -> Composite(x |> Seq.map (ana scn))                      
+        if scn |> isNull then nullArg "scn"
+        if scn |> Array.isEmpty then invalidArg "scn" "Unfold scenario must contain at least one step."
+
+        // We pass through a sequence and apply the unfold
+        // steps to each object. Each step produces a sequence of
+        // results we pack into a new composite of values.
+        scn
+        |> Array.tryHead
+        |> function
+            | None -> inComp
+            | Some step -> inComp
+                            |> function
+                               | Value x -> ana (scn |> Array.tail) (x |> step |> Seq.map Value |> Composite)
+                               | Composite x -> if x |> isNull then failwith "Composite sequence must not be null."
+                                                x |> Seq.map (ana scn) |> Composite
+
 
     let cata scn inSeq =
         if inSeq |> isNull then nullArg "inSeq"
