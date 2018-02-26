@@ -1,5 +1,7 @@
 namespace Composite
 
-type 'a Composite =
-    | Value of 'a
-    | Composite of seq<Composite<'a>>
+module DataTypes =
+
+    type 'a Composite =
+        | Value of 'a
+        | Composite of seq<Composite<'a>>

@@ -8,6 +8,7 @@ open System.Runtime.CompilerServices
 
 open FSharp.Core
 
+open DataTypes
 open Transforms
 
 [<Extension>]

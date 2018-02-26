@@ -8,7 +8,8 @@ using Composite;
 
 namespace Composite.Cs.Tests
 {
-    using SimpleComposite = Composite<Simple>.Composite;
+    using SimpleComposite = DataTypes.Composite<Simple>.Composite;
+    using SimpleValue = DataTypes.Composite<Simple>.Value;
 
     public class AnaTests
     {
@@ -31,20 +32,7 @@ namespace Composite.Cs.Tests
 
             var result = obj.Ana(scn);
 
-            Assert.True(result.IsComposite);
-
-            if (result is SimpleComposite compositeResult)
-            {
-                var resultArray = compositeResult.Item.ToArray();
-
-                Assert.True(resultArray.Length == 2);
-                Assert.True(resultArray[0].IsComposite);
-                Assert.True(resultArray[1].IsComposite);
-            }
-            else
-            {
-                Assert.True(false);
-            }
+            Assert.Equal("[ [ [ 4, 5 ], 3 ], 6 ]", result.AsString(x => x.Number.ToString()));
         }
     }
 }

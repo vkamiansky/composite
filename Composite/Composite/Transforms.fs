@@ -2,6 +2,8 @@ namespace Composite
 
 open System.Threading
 
+open DataTypes
+
 module Transforms =
 
     let toForest inComp =
@@ -72,22 +74,44 @@ module Transforms =
             }
         getBatches inSeq
 
-    let rec ana scn inComp =
+    let ana scn inComp =
         if scn |> isNull then nullArg "scn"
         if scn |> Array.isEmpty then invalidArg "scn" "Unfold scenario must contain at least one step."
+
+        // We take a sequence and return a Value variant
+        // if it contains one element or a Composite
+        // of values if it two plus elements.
+        let toValueOrComposite inSeq =
+            inSeq
+            |> Seq.tryHead
+            |> function
+                | None -> Composite Seq.empty
+                | Some result1 -> let inSeqRest = inSeq |> Seq.tail
+                                  inSeqRest
+                                  |> Seq.tryHead
+                                  |> function
+                                        | None -> Value result1
+                                        | Some result2 -> Composite (seq{
+                                                              yield Value result1
+                                                              yield Value result2
+                                                              yield! (inSeqRest |> Seq.tail |> Seq.map Value)
+                                                            })
 
         // We pass through a sequence and apply the unfold
         // steps to each object. Each step produces a sequence of
         // results we pack into a new composite of values.
-        scn
-        |> Array.tryHead
-        |> function
-            | None -> inComp
-            | Some step -> inComp
-                            |> function
-                               | Value x -> ana (scn |> Array.tail) (x |> step |> Seq.map Value |> Composite)
-                               | Composite x -> if x |> isNull then failwith "Composite sequence must not be null."
-                                                x |> Seq.map (ana scn) |> Composite
+        let rec getResults steps comp =
+            steps
+            |> Array.tryHead
+            |> function
+                | None -> comp
+                | Some step -> comp
+                                |> function
+                                   | Value x -> getResults (steps |> Array.tail) (x |> step |> toValueOrComposite)
+                                   | Composite x -> if x |> isNull then failwith "Composite sequence must not be null."
+                                                    x |> Seq.map (getResults steps) |> Composite
+        
+        getResults scn inComp
 
 
     let cata scn inSeq =
