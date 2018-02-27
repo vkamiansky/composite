@@ -42,4 +42,4 @@ open System.Collections.Generic
         /// The type of elements in the result enumerable.
         /// </typeparam>
         new (checkFunctions, transformFunction) =
-             CheckTransformRule (checkFunctions, transformFunction, ())        
+             CheckTransformRule (checkFunctions, transformFunction, ())

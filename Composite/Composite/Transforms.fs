@@ -78,24 +78,19 @@ module Transforms =
         if scn |> isNull then nullArg "scn"
         if scn |> Array.isEmpty then invalidArg "scn" "Unfold scenario must contain at least one step."
 
-        // We take a sequence and return a Value variant
-        // if it contains one element or a Composite
-        // of values if it two plus elements.
-        let toValueOrComposite inSeq =
-            inSeq
-            |> Seq.tryHead
+        // Applies a check/unfold rule to the given object.
+        // If the object passes the check function it is unfolded
+        // through the use of the unfold function, the results are wrapped
+        // into Values and their enumerable - into a Composite.
+        // If the object does not pass the check function it
+        // is returned as is wrapped in a Value.
+        let applyRuleAndWrapResult rule obj =
+            let (checkFunc, unfoldFunc) = rule
+            obj
+            |> checkFunc
             |> function
-                | None -> Composite Seq.empty
-                | Some result1 -> let inSeqRest = inSeq |> Seq.tail
-                                  inSeqRest
-                                  |> Seq.tryHead
-                                  |> function
-                                        | None -> Value result1
-                                        | Some result2 -> Composite (seq{
-                                                              yield Value result1
-                                                              yield Value result2
-                                                              yield! (inSeqRest |> Seq.tail |> Seq.map Value)
-                                                            })
+                | true -> obj |> unfoldFunc |> Seq.map Value |> Composite
+                | _ -> obj |> Value
 
         // We pass through a sequence and apply the unfold
         // steps to each object. Each step produces a sequence of
@@ -107,7 +102,7 @@ module Transforms =
                 | None -> comp
                 | Some step -> comp
                                 |> function
-                                   | Value x -> getResults (steps |> Array.tail) (x |> step |> toValueOrComposite)
+                                   | Value x -> getResults (steps |> Array.tail) (x |> applyRuleAndWrapResult step)
                                    | Composite x -> if x |> isNull then failwith "Composite sequence must not be null."
                                                     x |> Seq.map (getResults steps) |> Composite
         

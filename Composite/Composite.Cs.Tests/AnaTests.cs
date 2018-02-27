@@ -16,14 +16,15 @@ namespace Composite.Cs.Tests
         [Fact]
         public void UnfoldTest()
         {
-            var scn = new Func<Simple, Simple[]>[] {
-                    x => x.Number == 1
-                        ? new [] { new Simple { Number = 2, }, new Simple { Number = 3, }}
-                        : new[] { x },
-                    x => x.Number == 2
-                        ? new [] { new Simple { Number = 4, }, new Simple { Number = 5, }}
-                        : new[] { x },
-                };
+            var scn = new[] {
+                new CheckUnfoldRule<Simple>(
+                    x => x.Number == 1,
+                    x => new [] { new Simple { Number = 2, }, new Simple { Number = 3, }}
+                ),
+                new CheckUnfoldRule<Simple>(
+                    x => x.Number == 2,
+                    x => new [] { new Simple { Number = 4, }, new Simple { Number = 5, }}
+                )};
 
             var obj = C.Composite(new[] {
                 C.Value( new Simple { Number = 1, } ),

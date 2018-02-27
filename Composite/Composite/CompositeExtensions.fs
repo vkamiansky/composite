@@ -1,6 +1,5 @@
 namespace Composite
 
-open System
 open System.Collections.Generic
 open System.Linq;
 open System.Runtime.CompilerServices
@@ -23,8 +22,7 @@ type CompositeExtensions () =
     /// The source composite.
     /// </param>
     /// <param name="scenario">
-    /// The unfold scenario comprising steps as
-    /// rules of element-to-enumerable transformation.
+    /// An array element-to-enumerable transformation rules.
     /// </param>
     /// <typeparam name="T">
     /// The type of payload elements in the composite.
@@ -38,11 +36,11 @@ type CompositeExtensions () =
     /// <exception cref="System.ArgumentNullException">
     /// Thrown when <c>scenario</c> is null.
     /// </exception>
-    static member inline Ana (source: 'T Composite) (scenario: Func<'T, IEnumerable<'T>>[]) =
+    static member inline Ana (source: 'T Composite) (scenario: CheckUnfoldRule<'T>[]) =
         if scenario |> isNull then nullArg "scenario"
-        if scenario |> Array.isEmpty then invalidArg "scenario" "Unfold scenario must contain at least one step."
+        if scenario |> Array.isEmpty then invalidArg "scenario" "Unfold scenario must contain at least one rule."
 
-        ana (scenario |> Array.map (fun x -> x.Invoke)) source
+        ana (scenario |> Array.map (fun x -> x.CheckFunction.Invoke, x.UnfoldFunction.Invoke)) source
 
 module C =
 
