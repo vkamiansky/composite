@@ -44,8 +44,7 @@ type EnumerableExtensions () =
 
     [<Extension>]
     /// <summary>
-    /// Splits the <c>source</c> enumerable into batches with total size of
-    /// each multi-item batch no greater than <c>batchSize</c>.
+    /// Splits the <c>source</c> enumerable into batches with total size of each multi-item batch no greater than <c>batchSize</c>.
     /// </summary>
     /// <param name="source">
     /// The source enumerable.
@@ -66,8 +65,7 @@ type EnumerableExtensions () =
     
     [<Extension>]
     /// <summary>
-    /// Selects arrays of values from <c>source</c>, transforms
-    /// them, and returns the results as an output enumerable.
+    /// Selects arrays of values from <c>source</c>, transforms them, and returns the results as an output enumerable.
     /// </summary>
     /// <param name="source">
     /// The source enumerable.
@@ -82,13 +80,11 @@ type EnumerableExtensions () =
     /// The type of elements in the result enumerable.
     /// </typeparam>
     /// <returns>
-    /// An enumerable of results produced from source elements
-    /// by using the specified selection and transformation 
+    /// An enumerable of results produced from source elements by using the specified selection and transformation 
     /// scenario.
     /// </returns>
     /// <exception cref="System.ArgumentException">
-    /// Thrown when <c>scenario</c> is empty or it has rules
-    /// with null or empty arrays of check functions.
+    /// Thrown when <c>scenario</c> is empty or it has rules with null or empty arrays of check functions.
     /// </exception>
     /// <exception cref="System.ArgumentNullException">
     /// Thrown when <c>source</c> or <c>scenario</c> is null.
