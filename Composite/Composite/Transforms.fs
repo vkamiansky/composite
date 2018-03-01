@@ -2,7 +2,6 @@ namespace Composite
 
 open System.Threading
 open Composite.DataTypes
-open System
 
 module Transforms =
 
