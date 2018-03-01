@@ -4,36 +4,32 @@ open System
 open System.Collections.Generic
 
     /// <summary>
-    /// Represents a set of functions used to unfold an object
-    /// of type <c>T</c> to an enumerable of the same type.
+    /// Represents a set of functions used to unfold an object of type <c>T</c> to an enumerable of the same type.
     /// </summary>
-    type CheckUnfoldRule<'T> private (checkFunction, unfoldFunction, foo: unit) =
+    type CheckUnfoldRule<'T> =
 
         /// <summary>
-        /// A function determining whether the rule can be applied
-        /// to a given object of type <s>T</s>.
+        /// A function determining whether the rule can be applied to the given object of type <c>T</c>.
         /// </summary>
-        member this.CheckFunction: Func<'T, bool> = checkFunction
+        val CheckFunction: Func<'T, bool>
 
         /// <summary>
-        /// A function used to unfold a given object of type
-        /// <s>T</s> into an enumerable result.
+        /// A function used to unfold the given object of type <c>T</c> into an enumerable result.
         /// </summary>
-        member this.UnfoldFunction: Func<'T, IEnumerable<'T>> = unfoldFunction
+        val UnfoldFunction: Func<'T, IEnumerable<'T>>
 
         /// <summary>
-        /// Creates a new CheckUnfoldRule
+        /// Creates a new CheckUnfoldRule.
         /// </summary>
         /// <param name="checkFunction">
-        /// A function determining whether the rule can be applied
-        /// to a given object of type <s>T</s>.
+        /// A function determining whether the rule can be applied to the given object of type <c>T</c>.
         /// </param>
         /// <param name="unfoldFunction">
-        /// A function used to unfold a given object of type
-        /// <s>T</s> into an enumerable result.
+        /// A function used to unfold the given object of type <c>T</c> into an enumerable result.
         /// </param>
         /// <typeparam name="T">
         /// The type of the unfolding object.
         /// </typeparam>
         new (checkFunction, unfoldFunction) =
-             CheckUnfoldRule (checkFunction, unfoldFunction, ())        
+             { CheckFunction = checkFunction
+               UnfoldFunction = unfoldFunction }        
