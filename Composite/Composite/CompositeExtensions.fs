@@ -15,8 +15,7 @@ type CompositeExtensions () =
 
     [<Extension>]
     /// <summary>
-    /// Unfolds the source Composite according to the
-    /// specified array of steps.
+    /// Unfolds the source Composite according to the specified array of steps.
     /// </summary>
     /// <param name="source">
     /// The source composite.
