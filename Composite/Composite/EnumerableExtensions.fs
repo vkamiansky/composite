@@ -84,7 +84,7 @@ type EnumerableExtensions () =
     /// scenario.
     /// </returns>
     /// <exception cref="System.ArgumentException">
-    /// Thrown when <c>scenario</c> is empty or it has rules with null or empty arrays of check functions.
+    /// Thrown when <c>scenario</c> has rules with null or empty arrays of check functions.
     /// </exception>
     /// <exception cref="System.ArgumentNullException">
     /// Thrown when <c>source</c> or <c>scenario</c> is null.
@@ -92,7 +92,6 @@ type EnumerableExtensions () =
     static member inline Cata (source: IEnumerable<'TSource>) (scenario: CheckTransformRule<'TSource, 'TResult>[]) =
         if source |> isNull then nullArg "source"
         if scenario |> isNull then nullArg "scenario"
-        if scenario |> Array.isEmpty then invalidArg "scenario" "Check-transform scenario must contain at least one rule."
 
         let scn = scenario |> Array.map (fun p -> p.CheckFunctions 
                                                     |> function
