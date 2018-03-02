@@ -33,7 +33,7 @@ module Transforms =
             seq {
                     let mutable cur = getNext ()
                     while cur |> Option.isSome do
-                        yield cur |> (function | Some x -> x | None -> failwith "Unexpected situation in enumeration.")
+                        yield cur.Value
                         cur <- getNext ()
             }
 
