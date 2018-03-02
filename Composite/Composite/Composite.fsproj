@@ -8,6 +8,7 @@
     <Compile Include="DataTypes.fs" />
     <Compile Include="Transforms.fs" />
     <Compile Include="C.fs" />
+    <Compile Include="EnumerableExtensions.fs" />
   </ItemGroup>
 
 </Project>

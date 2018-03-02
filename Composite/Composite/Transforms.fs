@@ -57,12 +57,25 @@ module Transforms =
         getPages inSeq
 
     let toBatched batchSize getElemSize inSeq =
-        let rec getBatchAndRest numRemains pageAndRest = 
-            match numRemains > 0, pageAndRest with
-            | true, (p, r) -> match r |> Seq.tryHead with
-                                | Some h -> getBatchAndRest (numRemains-(getElemSize h)) (Array.append p [|h|], r |> Seq.tail)
-                                | None -> pageAndRest
-            | false, pr -> pr
+        // Here we extract a batch from an input sequence.
+        // We do this recursively, passing the amount of remaining
+        // space in batch as a parameter, plus a tuple comprising
+        // the batch under constuction and the remaining sequence
+        // we have to walk through.
+        let rec getBatchAndRest roomLeft batchAndRest = 
+            let (page, rest) = batchAndRest
+            rest
+            |> Seq.tryHead
+            |> function
+               | Some head -> let size = getElemSize head
+                              let roomLeftNew = roomLeft - size
+                              page
+                              |> function
+                                 | [||] -> getBatchAndRest roomLeftNew ([|head|], rest |> Seq.tail)
+                                 | _ -> if roomLeftNew < 0
+                                        then batchAndRest
+                                        else getBatchAndRest roomLeftNew ([|head|] |> Array.append page, rest |> Seq.tail)
+               | None -> batchAndRest
 
         let rec getBatches inSeq2 =
             seq {
@@ -71,6 +84,7 @@ module Transforms =
                     | p, r -> yield p
                               yield! getBatches r
             }
+
         getBatches inSeq
 
     let private toComposite inSeq =
