@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DocumentationFile>bin\Debug\netstandard2.0\Composite.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="DataTypes.fs" />
     <Compile Include="Transforms.fs" />
-    <Compile Include="C.fs" />
+    <Compile Include="CompositeExtensions.fs" />
+    <Compile Include="CheckTransformRule.fs"/>
     <Compile Include="EnumerableExtensions.fs" />
   </ItemGroup>
 

@@ -60,3 +60,39 @@ type EnumerableExtensions () =
     /// </returns>
     static member inline AsBatched (source: IEnumerable<'T>) (batchSize: int) (getElementSize: Func<'T, int>) =
         Enumerable.AsEnumerable(toBatched batchSize getElementSize.Invoke source)
+
+    [<Extension>]
+    /// <summary>
+    /// Selects arrays of values from <c>source</c>, transforms them, and returns the results as an output enumerable.
+    /// </summary>
+    /// <param name="source">
+    /// The source enumerable.
+    /// </param>
+    /// <param name="scenario">
+    /// An array of selection and transformation rules.
+    /// </param>
+    /// <typeparam name="TSource">
+    /// The type of elements in the source enumerable.
+    /// </typeparam>
+    /// <typeparam name="TResult">
+    /// The type of elements in the result enumerable.
+    /// </typeparam>
+    /// <returns>
+    /// An enumerable of results produced from source elements by using the specified selection and transformation 
+    /// scenario.
+    /// </returns>
+    /// <exception cref="System.ArgumentException">
+    /// Thrown when <c>scenario</c> has rules with null or empty arrays of check functions.
+    /// </exception>
+    /// <exception cref="System.ArgumentNullException">
+    /// Thrown when <c>source</c> or <c>scenario</c> is null.
+    /// </exception>
+    static member inline Cata (source: IEnumerable<'TSource>) (scenario: CheckTransformRule<'TSource, 'TResult>[]) =
+        if source |> isNull then nullArg "source"
+        if scenario |> isNull then nullArg "scenario"
+
+        let scn = scenario |> Array.map (fun p -> p.CheckFunctions 
+                                                    |> function
+                                                        | null | [||] -> invalidArg "scenario" "A check-transform rule must contain at least one check function."
+                                                        | funcs -> funcs |> Array.map (fun x -> x.Invoke) , p.TransformFunction.Invoke)
+        cata scn source
