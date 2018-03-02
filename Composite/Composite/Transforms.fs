@@ -63,18 +63,18 @@ module Transforms =
         // the batch under constuction and the remaining sequence
         // we have to walk through.
         let rec getBatchAndRest roomLeft batchAndRest = 
-            let (page, rest) = batchAndRest
+            let (batch, rest) = batchAndRest
             rest
             |> Seq.tryHead
             |> function
                | Some head -> let size = getElemSize head
                               let roomLeftNew = roomLeft - size
-                              page
+                              batch
                               |> function
                                  | [||] -> getBatchAndRest roomLeftNew ([|head|], rest |> Seq.tail)
                                  | _ -> if roomLeftNew < 0
                                         then batchAndRest
-                                        else getBatchAndRest roomLeftNew ([|head|] |> Array.append page, rest |> Seq.tail)
+                                        else getBatchAndRest roomLeftNew ([|head|] |> Array.append batch, rest |> Seq.tail)
                | None -> batchAndRest
 
         let rec getBatches inSeq2 =
