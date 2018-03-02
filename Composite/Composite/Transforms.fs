@@ -33,7 +33,7 @@ module Transforms =
             seq {
                     let mutable cur = getNext ()
                     while cur |> Option.isSome do
-                        yield cur |> (function | Some x -> x | None -> failwith "Unexpected situation in enumeration.")
+                        yield cur.Value
                         cur <- getNext ()
             }
 
@@ -57,12 +57,25 @@ module Transforms =
         getPages inSeq
 
     let toBatched batchSize getElemSize inSeq =
-        let rec getBatchAndRest numRemains batchAndRest = 
-            match numRemains > 0, batchAndRest with
-            | true, (p, r) -> match r |> Seq.tryHead with
-                                | Some h -> getBatchAndRest (numRemains-(getElemSize h)) (Array.append p [|h|], r |> Seq.tail)
-                                | None -> batchAndRest
-            | false, pr -> pr
+        // Here we extract a batch from an input sequence.
+        // We do this recursively, passing the amount of remaining
+        // space in batch as a parameter, plus a tuple comprising
+        // the batch under construction and the remaining sequence
+        // we have to walk through.
+        let rec getBatchAndRest roomLeft batchAndRest = 
+            let (batch, rest) = batchAndRest
+            rest
+            |> Seq.tryHead
+            |> function
+               | None -> batchAndRest
+               | Some head -> let size = getElemSize head
+                              let roomLeftNew = roomLeft - size
+                              batch
+                              |> function
+                                 | [||] -> getBatchAndRest roomLeftNew ([|head|], rest |> Seq.tail)
+                                 | _ -> if roomLeftNew < 0
+                                        then batchAndRest
+                                        else getBatchAndRest roomLeftNew ([|head|] |> Array.append batch, rest |> Seq.tail)
 
         let rec getBatches inSeq2 =
             seq {
@@ -71,6 +84,7 @@ module Transforms =
                     | p, r -> yield p
                               yield! getBatches r
             }
+
         getBatches inSeq
 
     let private toComposite inSeq =
