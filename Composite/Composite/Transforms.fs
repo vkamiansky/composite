@@ -67,6 +67,7 @@ module Transforms =
             rest
             |> Seq.tryHead
             |> function
+               | None -> batchAndRest
                | Some head -> let size = getElemSize head
                               let roomLeftNew = roomLeft - size
                               batch
@@ -75,7 +76,6 @@ module Transforms =
                                  | _ -> if roomLeftNew < 0
                                         then batchAndRest
                                         else getBatchAndRest roomLeftNew ([|head|] |> Array.append batch, rest |> Seq.tail)
-               | None -> batchAndRest
 
         let rec getBatches inSeq2 =
             seq {
