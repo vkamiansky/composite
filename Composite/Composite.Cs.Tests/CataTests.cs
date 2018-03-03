@@ -87,18 +87,21 @@ namespace Composite.Cs.Tests
 
             Assert.Throws<ArgumentException>(() =>
             {
-                var badRules = new CheckTransformRule<int, string>[] { };
-                goodSource.Cata<int, string>(badRules);
-            });
-
-            Assert.Throws<ArgumentException>(() =>
-            {
                 var badRules = new[] {
                     new CheckTransformRule<int, string>(
                         new Func<int, bool>[]{},(x) => new[] {""}),
                         };
                 goodSource.Cata<int, string>(badRules);
             });
+        }
+
+        [Fact]
+        public void TrivialScenarioTest()
+        {
+            var noGoSource = Enumerable.Range(1, 10).AsLimited(0);
+            var trivialRules = new CheckTransformRule<int, string>[] { };
+            var result = noGoSource.Cata<int, string>(trivialRules).ToArray();
+            Assert.Empty(result);
         }
     }
 }
