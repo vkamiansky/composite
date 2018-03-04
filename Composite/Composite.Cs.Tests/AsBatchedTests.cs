@@ -76,5 +76,21 @@ namespace Composite.Cs.Tests {
 
             Assert.Equal(6, callsCount);
         }
+
+        [Fact]
+        public void SourceRedundantWalkthroughTest () {
+            var callsCount = 0;
+            var inputSequence = Enumerable.Range(1, 10)
+                .Select(x => {
+                    callsCount++;
+                    return x;
+                })
+                .AsLimited(6);
+            var batches = inputSequence.AsBatched(7, x => x)
+                .Take(4)
+                .ToArray();
+
+            Assert.Equal(6, callsCount);
+        }
     }
  }
