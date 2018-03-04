@@ -57,35 +57,34 @@ module Transforms =
         getPages inSeq
 
     let toBatched batchSize getElemSize inSeq =
-        // Here we extract a batch from an input sequence.
-        // We do this recursively, passing the amount of remaining
-        // space in batch as a parameter, plus a tuple comprising
-        // the batch under construction and the remaining sequence
-        // we have to walk through.
-        let rec getBatchAndRest roomLeft batchAndRest = 
-            let (batch, rest) = batchAndRest
+        // We walk through a sequence and assemble a batch
+        // of elements. If we have an extra element we put into
+        // the next batch and pass the size of the next batch
+        // as well so we don't need to calculate it again.
+        let rec getNewFrame roomLeft frame = 
+            let (batch, batchNext, batchNextSize, rest) = frame
             rest
             |> Seq.tryHead
             |> function
-               | None -> batchAndRest
+               | None -> frame
                | Some head -> let size = getElemSize head
                               let roomLeftNew = roomLeft - size
                               batch
                               |> function
-                                 | [||] -> getBatchAndRest roomLeftNew ([|head|], rest |> Seq.tail)
+                                 | [||] -> getNewFrame roomLeftNew ([|head|], batchNext, batchNextSize, rest |> Seq.tail)
                                  | _ -> if roomLeftNew < 0
-                                        then batchAndRest
-                                        else getBatchAndRest roomLeftNew ([|head|] |> Array.append batch, rest |> Seq.tail)
+                                        then batch, [|head|], size, rest |> Seq.tail
+                                        else getNewFrame roomLeftNew ([|head|] |> Array.append batch, batchNext, batchNextSize, rest |> Seq.tail)
 
-        let rec getBatches inSeq2 =
+        let rec getBatches firstBatch firstBatchSize restSeq =
             seq {
-                    match getBatchAndRest batchSize ([||], inSeq2) with
-                    | [||], _ -> yield! []
-                    | p, r -> yield p
-                              yield! getBatches r
+                    match getNewFrame (batchSize-firstBatchSize) (firstBatch, [||], 0, restSeq) with
+                    | [||], _, _, _ -> yield! []
+                    | b, bNext, bNextSize, r -> yield b
+                                                yield! getBatches bNext bNextSize r
             }
 
-        getBatches inSeq
+        getBatches [||] 0 inSeq
 
     let private toComposite inSeq =
         match Seq.tryHead inSeq with
