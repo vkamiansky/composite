@@ -39,23 +39,6 @@ module Transforms =
 
         Array.init numParts (fun _ -> getSeq ())
 
-    let toPaged pageSize inSeq =
-        let rec getPageAndRest numRemains pageAndRest = 
-            match numRemains > 0, pageAndRest with
-            | true, (p, r) -> match r |> Seq.tryHead with
-                                | Some h -> getPageAndRest (numRemains-1) (Array.append p [|h|], r |> Seq.tail)
-                                | None -> pageAndRest
-            | false, pr -> pr
-
-        let rec getPages inSeq2 =
-            seq {
-                    match getPageAndRest pageSize ([||], inSeq2) with
-                    | [||], _ -> yield! []
-                    | p, r -> yield p
-                              yield! getPages r
-            }
-        getPages inSeq
-
     let toBatched batchSize getElemSize inSeq =
         // We walk through a sequence and assemble a batch
         // of elements. If we have an extra element we put into
