@@ -5,6 +5,12 @@ open Composite.DataTypes
 
 module Transforms =
 
+    let toGetElementFunc (xs: seq<_>) = 
+        let enumerator = xs.GetEnumerator()
+        fun () -> if enumerator.MoveNext()
+                  then Some enumerator.Current
+                  else None
+
     let toForest inComp =
         match inComp with
         | Composite x -> x
@@ -44,30 +50,29 @@ module Transforms =
         // of elements. If we have an extra element we put into
         // the next batch and pass the size of the next batch
         // as well so we don't need to calculate it again.
-        let rec getNewFrame roomLeft frame = 
-            let (batch, batchNext, batchNextSize, rest) = frame
-            rest
-            |> Seq.tryHead
+        let rec getNewFrame roomLeft getElem frame = 
+            let (batch, batchNext, batchNextSize) = frame
+            getElem()
             |> function
                | None -> frame
                | Some head -> let size = getElemSize head
                               let roomLeftNew = roomLeft - size
                               batch
                               |> function
-                                 | [||] -> getNewFrame roomLeftNew ([|head|], batchNext, batchNextSize, rest |> Seq.tail)
+                                 | [||] -> getNewFrame roomLeftNew getElem ([|head|], batchNext, batchNextSize)
                                  | _ -> if roomLeftNew < 0
-                                        then batch, [|head|], size, rest |> Seq.tail
-                                        else getNewFrame roomLeftNew ([|head|] |> Array.append batch, batchNext, batchNextSize, rest |> Seq.tail)
+                                        then batch, [|head|], size
+                                        else getNewFrame roomLeftNew getElem ([|head|] |> Array.append batch, batchNext, batchNextSize)
 
-        let rec getBatches firstBatch firstBatchSize restSeq =
+        let rec getBatches firstBatch firstBatchSize getElem =
             seq {
-                    match getNewFrame (batchSize-firstBatchSize) (firstBatch, [||], 0, restSeq) with
-                    | [||], _, _, _ -> yield! []
-                    | b, bNext, bNextSize, r -> yield b
-                                                yield! getBatches bNext bNextSize r
+                    match getNewFrame (batchSize-firstBatchSize) getElem (firstBatch, [||], 0) with
+                    | [||], _, _ -> yield! []
+                    | b, bNext, bNextSize -> yield b
+                                             yield! getBatches bNext bNextSize getElem
             }
 
-        getBatches [||] 0 inSeq
+        inSeq |> toGetElementFunc |> getBatches [||] 0
 
     let private toComposite inSeq =
         match Seq.tryHead inSeq with
