@@ -5,9 +5,9 @@ open Composite.DataTypes
 
 module Transforms =
 
-    let toGetElementFunc (inSeq: seq<_>) = 
-        let enumerator = inSeq.GetEnumerator()
-        fun () -> if enumerator.MoveNext()
+    let toGetElement (inSeq: seq<_>) = 
+        let enumerator = inSeq.GetEnumerator ()
+        fun () -> if enumerator.MoveNext ()
                   then Some enumerator.Current
                   else None
 
@@ -26,21 +26,23 @@ module Transforms =
     let toPartitioned numParts inSeq =
         let lockObj = new obj ()
 
-        let mutable restOfSeq = inSeq
+        let getElem = inSeq |> toGetElement
 
-        let getNext () =
+        // We create a thread-safe version
+        // of getElem. We need it in order to
+        // make partitions work in parallel consistently. 
+        let getElemSafe () =
             Monitor.Enter lockObj
-            let res = restOfSeq |> Seq.tryHead
-            restOfSeq <- (restOfSeq |> Seq.tail)
+            let res = getElem ()
             Monitor.Exit lockObj
             res
 
-        let getSeq () = 
+        let rec getSeq () = 
             seq {
-                    let mutable cur = getNext ()
-                    while cur |> Option.isSome do
-                        yield cur.Value
-                        cur <- getNext ()
+                    match getElemSafe () with
+                    | Some element -> yield element
+                                      yield! getSeq ()
+                    | None -> yield! []
             }
 
         Array.init numParts (fun _ -> getSeq ())
@@ -52,7 +54,7 @@ module Transforms =
         // as well so we don't need to calculate it again.
         let rec getNewFrame roomLeft getElem frame = 
             let (batch, batchNext, batchNextSize) = frame
-            getElem()
+            getElem ()
             |> function
                | None -> frame
                | Some head -> let size = getElemSize head
@@ -72,7 +74,7 @@ module Transforms =
                                              yield! getBatches bNext bNextSize getElem
             }
 
-        inSeq |> toGetElementFunc |> getBatches [||] 0
+        inSeq |> toGetElement |> getBatches [||] 0
 
     let private toComposite inSeq =
         match Seq.tryHead inSeq with
@@ -137,16 +139,16 @@ module Transforms =
 
         // This function gets frames and results for each object in the input sequence
         // and yields the results to the output sequence
-        let rec getResults frames objs =
+        let rec getResults frames getElem =
             seq {
-                    match frames, objs with
-                    | [||], _ -> yield! []
-                    | f, x ->
-                       match Seq.tryHead x with
-                       | None -> yield! Seq.empty
+                    match frames with
+                    | [||] -> yield! []
+                    | f ->
+                       match getElem () with
+                       | None -> yield! []
                        | Some head -> match getFramesAndResults (f, Seq.empty) head with
                                       | (framesNew, resultsNew) ->  yield! resultsNew
-                                                                    yield! getResults framesNew (Seq.tail x)
+                                                                    yield! getResults framesNew getElem
             }
 
-        getResults framesInitial inSeq
+        inSeq |> toGetElement |> getResults framesInitial

@@ -65,6 +65,53 @@ namespace Composite.Cs.Tests
         }
 
         [Fact]
+        public void InputRedundantWalkthroughTest()
+        {
+            var callsCount = 0;
+            var inputSeq = Enumerable.Range(1, 10)
+                .WithSideEffect(_ => callsCount++)
+                .Select(x => new Simple { Number = x, });
+
+            var checkTransformRules = new[] {
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 5,
+                }, (x) => new[]{ "2" }),
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 3,
+                }, (x) => new[]{ "3" }),
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 3,
+                }, (x) => new[]{ "4" }),
+            };
+
+            inputSeq.Cata(checkTransformRules).ToArray();
+            Assert.Equal(5, callsCount);
+        }
+
+        [Fact]
+        public void OutputRedundantWalkthroughTest()
+        {
+            var callsCount = 0;
+            var inputSeq = Enumerable.Range(1, 10)
+                .Select(x => new Simple { Number = x, });
+
+            var checkTransformRules = new[] {
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 5,
+                }, (x) => new[]{ "2", "3", "4" }.WithSideEffect(_ => callsCount++)),
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 3,
+                }, (x) => new[]{ "6", "9", "8" }.WithSideEffect(_ => callsCount++)),
+                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                    (x) => x.Number == 3,
+                }, (x) => new[]{ "7", "5", "1" }.WithSideEffect(_ => callsCount++)),
+            };
+
+            inputSeq.Cata(checkTransformRules).ToArray();
+            Assert.Equal(9, callsCount);
+        }
+
+        [Fact]
         public void InvalidParametersTest()
         {
             Assert.Throws<ArgumentNullException>(() =>

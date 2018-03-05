@@ -25,6 +25,19 @@ namespace Composite.Cs.Tests {
         }
 
         [Fact]
+        public void SourceRedundantWalkthroughTest () {
+            var callsCount = 0;
+            var inputSequence = Enumerable
+                .Range(1, 10)
+                .WithSideEffect(_ => callsCount++);
+            var partitions = inputSequence.AsPartitioned(3);
+
+            partitions.Select(x => x.Take(2).ToArray()).ToArray();
+
+            Assert.Equal(6, callsCount);
+        }
+
+        [Fact]
         public void InvalidParametersTest()
         {
             var inputSequence = Enumerable.Range(1, 10).AsLimited(0);
