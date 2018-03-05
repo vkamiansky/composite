@@ -5,8 +5,8 @@ open Composite.DataTypes
 
 module Transforms =
 
-    let toGetElementFunc (xs: seq<_>) = 
-        let enumerator = xs.GetEnumerator()
+    let toGetElementFunc (inSeq: seq<_>) = 
+        let enumerator = inSeq.GetEnumerator()
         fun () -> if enumerator.MoveNext()
                   then Some enumerator.Current
                   else None

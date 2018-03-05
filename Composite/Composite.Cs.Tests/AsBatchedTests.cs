@@ -82,10 +82,7 @@ namespace Composite.Cs.Tests {
             var callsCount = 0;
             var inputSequence = Enumerable.Range(1, 10)
                 .AsLimited(7)
-                .Select(x => {
-                    callsCount++;
-                    return x;
-                });
+                .WithSideEffect(_=> callsCount++);
             var batches = inputSequence.AsBatched(7, x => x)
                 .Take(4)
                 .ToArray();
