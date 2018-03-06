@@ -1,7 +1,8 @@
 configuration: Release
 
-before_build:
-  - nuget restore
+#before_build:
+#  - nuget restore
+image: Visual Studio 2017
   
 build:
   verbosity: minimal
