@@ -1,9 +1,9 @@
-configuration: Release
+ configuration: Release
 
 image: Visual Studio 2017
 
 before_build:
-  - dotnet restore
+  - dotnet restore Composite
   
 build:
   verbosity: minimal
