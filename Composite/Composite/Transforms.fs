@@ -66,9 +66,9 @@ module Transforms =
                                         then batch, [|head|], size
                                         else getNewFrame roomLeftNew getElem ([|head|] |> Array.append batch, batchNext, batchNextSize)
 
-        let rec getBatches firstBatch firstBatchSize getElem =
+        let rec getBatches curBatch curBatchSize getElem =
             seq {
-                    match getNewFrame (batchSize-firstBatchSize) getElem (firstBatch, [||], 0) with
+                    match getNewFrame (batchSize-curBatchSize) getElem (curBatch, [||], 0) with
                     | [||], _, _ -> yield! []
                     | b, bNext, bNextSize -> yield b
                                              yield! getBatches bNext bNextSize getElem
