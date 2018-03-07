@@ -1,0 +1,12 @@
+configuration: Release
+
+image: Visual Studio 2017
+
+before_build:
+  - dotnet restore Composite
+  
+build:
+  verbosity: minimal
+
+before_deploy:
+  - dotnet pack Composite

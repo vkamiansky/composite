@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DocumentationFile>bin\Debug\netstandard2.0\Composite.xml</DocumentationFile>
+    <PackageId>Composite</PackageId>
+    <Version>$(APPVEYOR_BUILD_VERSION)</Version>
+    <Authors>Vitaly Kamiansky, Vladimir Ilin</Authors>
+    <Company>FirstLine Software</Company>
   </PropertyGroup>
 
   <ItemGroup>
