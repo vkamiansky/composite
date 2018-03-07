@@ -5,6 +5,12 @@ open Composite.DataTypes
 
 module Transforms =
 
+    let toGetElement (inSeq: seq<_>) = 
+        let enumerator = inSeq.GetEnumerator ()
+        fun () -> if enumerator.MoveNext ()
+                  then Some enumerator.Current
+                  else None
+
     let toForest inComp =
         match inComp with
         | Composite x -> x
@@ -20,72 +26,55 @@ module Transforms =
     let toPartitioned numParts inSeq =
         let lockObj = new obj ()
 
-        let mutable restOfSeq = inSeq
+        let getElem = inSeq |> toGetElement
 
-        let getNext () =
+        // We create a thread-safe version
+        // of getElem. We need it in order to
+        // make partitions work in parallel consistently. 
+        let getElemSafe () =
             Monitor.Enter lockObj
-            let res = restOfSeq |> Seq.tryHead
-            restOfSeq <- (restOfSeq |> Seq.tail)
+            let res = getElem ()
             Monitor.Exit lockObj
             res
 
-        let getSeq () = 
+        let rec getSeq () = 
             seq {
-                    let mutable cur = getNext ()
-                    while cur |> Option.isSome do
-                        yield cur.Value
-                        cur <- getNext ()
+                    match getElemSafe () with
+                    | Some element -> yield element
+                                      yield! getSeq ()
+                    | None -> yield! []
             }
 
         Array.init numParts (fun _ -> getSeq ())
 
-    let toPaged pageSize inSeq =
-        let rec getPageAndRest numRemains pageAndRest = 
-            match numRemains > 0, pageAndRest with
-            | true, (p, r) -> match r |> Seq.tryHead with
-                                | Some h -> getPageAndRest (numRemains-1) (Array.append p [|h|], r |> Seq.tail)
-                                | None -> pageAndRest
-            | false, pr -> pr
-
-        let rec getPages inSeq2 =
-            seq {
-                    match getPageAndRest pageSize ([||], inSeq2) with
-                    | [||], _ -> yield! []
-                    | p, r -> yield p
-                              yield! getPages r
-            }
-        getPages inSeq
-
     let toBatched batchSize getElemSize inSeq =
-        // Here we extract a batch from an input sequence.
-        // We do this recursively, passing the amount of remaining
-        // space in batch as a parameter, plus a tuple comprising
-        // the batch under construction and the remaining sequence
-        // we have to walk through.
-        let rec getBatchAndRest roomLeft batchAndRest = 
-            let (batch, rest) = batchAndRest
-            rest
-            |> Seq.tryHead
+        // We walk through a sequence and assemble a batch
+        // of elements. If we have an extra element we put into
+        // the next batch and pass the size of the next batch
+        // as well so we don't need to calculate it again.
+        let rec getNewFrame roomLeft getElem frame = 
+            let (batch, batchNext, batchNextSize) = frame
+            getElem ()
             |> function
-               | None -> batchAndRest
+               | None -> frame
                | Some head -> let size = getElemSize head
                               let roomLeftNew = roomLeft - size
                               batch
                               |> function
-                                 | [||] -> getBatchAndRest roomLeftNew ([|head|], rest |> Seq.tail)
+                                 | [||] -> getNewFrame roomLeftNew getElem ([|head|], batchNext, batchNextSize)
                                  | _ -> if roomLeftNew < 0
-                                        then batchAndRest
-                                        else getBatchAndRest roomLeftNew ([|head|] |> Array.append batch, rest |> Seq.tail)
+                                        then batch, [|head|], size
+                                        else getNewFrame roomLeftNew getElem ([|head|] |> Array.append batch, batchNext, batchNextSize)
 
-        let rec getBatches inSeq2 =
+        let rec getBatches curBatch curBatchSize getElem =
             seq {
-                    match getBatchAndRest batchSize ([||], inSeq2) with
-                    | [||], _ -> yield! []
-                    | p, r -> yield p
-                              yield! getBatches r
+                    match getNewFrame (batchSize-curBatchSize) getElem (curBatch, [||], 0) with
+                    | [||], _, _ -> yield! []
+                    | b, bNext, bNextSize -> yield b
+                                             yield! getBatches bNext bNextSize getElem
             }
 
-        getBatches inSeq
+        inSeq |> toGetElement |> getBatches [||] 0
 
     let private toComposite inSeq =
         match Seq.tryHead inSeq with
@@ -150,16 +139,16 @@ module Transforms =
 
         // This function gets frames and results for each object in the input sequence
         // and yields the results to the output sequence
-        let rec getResults frames objs =
+        let rec getResults frames getElem =
             seq {
-                    match frames, objs with
-                    | [||], _ -> yield! []
-                    | f, x ->
-                       match Seq.tryHead x with
-                       | None -> yield! Seq.empty
+                    match frames with
+                    | [||] -> yield! []
+                    | f ->
+                       match getElem () with
+                       | None -> yield! []
                        | Some head -> match getFramesAndResults (f, Seq.empty) head with
                                       | (framesNew, resultsNew) ->  yield! resultsNew
-                                                                    yield! getResults framesNew (Seq.tail x)
+                                                                    yield! getResults framesNew getElem
             }
 
-        getResults framesInitial inSeq
+        inSeq |> toGetElement |> getResults framesInitial

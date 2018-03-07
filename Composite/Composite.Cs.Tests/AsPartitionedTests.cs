@@ -23,5 +23,30 @@ namespace Composite.Cs.Tests {
             Assert.Equal(new []{3,4}, arr2);
             Assert.Equal(new []{5,6}, arr3);
         }
+
+        [Fact]
+        public void SourceRedundantWalkthroughTest () {
+            var callsCount = 0;
+            var inputSequence = Enumerable
+                .Range(1, 10)
+                .WithSideEffect(_ => callsCount++);
+            var partitions = inputSequence.AsPartitioned(3);
+
+            partitions.Select(x => x.Take(2).ToArray()).ToArray();
+
+            Assert.Equal(6, callsCount);
+        }
+
+        [Fact]
+        public void InvalidParametersTest()
+        {
+            var inputSequence = Enumerable.Range(1, 10).AsLimited(0);
+
+            Assert.Throws<ArgumentException>(() => inputSequence.AsPartitioned(0).ToArray());
+            Assert.Throws<ArgumentException>(() => inputSequence.AsPartitioned(-1).ToArray());
+
+            IEnumerable<int> badSequence = null;
+            Assert.Throws<ArgumentNullException>(() => badSequence.AsPartitioned(1).ToArray());
+        }
     }
  }

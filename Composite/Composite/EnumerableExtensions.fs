@@ -23,7 +23,16 @@ type EnumerableExtensions () =
     /// <returns>
     /// An array of partitions the <c>source</c> enumerable is distributed across.
     /// </returns>
+    /// <exception cref="System.ArgumentException">
+    /// Thrown when <c>numberPartitions</c> is not positive.
+    /// </exception>
+    /// <exception cref="System.ArgumentNullException">
+    /// Thrown when <c>source</c> is null.
+    /// </exception>
     static member inline AsPartitioned (source: IEnumerable<'T>) (numberPartitions: int) =
+        if source |> isNull then nullArg "source"
+        if numberPartitions <= 0 then invalidArg "numberPartitions" "Number of partitions must not be 0 or negative."
+
         toPartitioned numberPartitions source |> Array.map Enumerable.AsEnumerable
 
     [<Extension>]
@@ -39,8 +48,17 @@ type EnumerableExtensions () =
     /// <returns>
     /// An enumerable of pages of size at most <c>pageSize</c>.
     /// </returns>
+    /// <exception cref="System.ArgumentException">
+    /// Thrown when <c>pageSize</c> is not positive.
+    /// </exception>
+    /// <exception cref="System.ArgumentNullException">
+    /// Thrown when <c>source</c> is null.
+    /// </exception>
     static member inline AsPaged (source: IEnumerable<'T>) (pageSize: int) =
-        Enumerable.AsEnumerable(toPaged pageSize source)
+        if source |> isNull then nullArg "source"
+        if pageSize <= 0 then invalidArg "pageSize" "Page size must not be 0 or negative."
+
+        Enumerable.AsEnumerable(Seq.chunkBySize pageSize source)
 
     [<Extension>]
     /// <summary>
@@ -58,7 +76,16 @@ type EnumerableExtensions () =
     /// <returns>
     /// An enumerable of batches with multi-item batches of size no greater than <c>batchSize</c>.
     /// </returns>
+    /// <exception cref="System.ArgumentException">
+    /// Thrown when <c>batchSize</c> is not positive.
+    /// </exception>
+    /// <exception cref="System.ArgumentNullException">
+    /// Thrown when <c>source</c> is null.
+    /// </exception>
     static member inline AsBatched (source: IEnumerable<'T>) (batchSize: int) (getElementSize: Func<'T, int>) =
+        if source |> isNull then nullArg "source"
+        if batchSize <= 0 then invalidArg "batchSize" "Batch size must not be 0 or negative."
+
         Enumerable.AsEnumerable(toBatched batchSize getElementSize.Invoke source)
 
     [<Extension>]
