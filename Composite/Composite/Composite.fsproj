@@ -12,8 +12,9 @@
   <ItemGroup>
     <Compile Include="DataTypes.fs" />
     <Compile Include="Transforms.fs" />
-    <Compile Include="CompositeExtensions.fs" />
     <Compile Include="CheckTransformRule.fs"/>
+    <Compile Include="CheckUnfoldRule.fs"/>
+    <Compile Include="CompositeExtensions.fs" />
     <Compile Include="EnumerableExtensions.fs" />
   </ItemGroup>
 

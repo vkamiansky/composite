@@ -1,7 +1,8 @@
 namespace Composite
 
 open System.Threading
-open Composite.DataTypes
+
+open DataTypes
 
 module Transforms =
 
@@ -76,24 +77,40 @@ module Transforms =
 
         inSeq |> toGetElement |> getBatches [||] 0
 
-    let private toComposite inSeq =
-        match Seq.tryHead inSeq with
-        | None -> failwith "Empty data sequence will not lead to a meaningful Composite instance."
-        | Some x -> let inSeqTail = Seq.tail inSeq
-                    match Seq.tryHead inSeqTail with
-                    | None -> Value x
-                    | Some y -> Composite(seq {
-                                              yield Value x
-                                              yield Value y
-                                              yield! (Seq.tail inSeqTail) |> Seq.map Value
-                                           })
+    let ana scn inComp =
+        if scn |> isNull then nullArg "scn"
+        if scn |> Array.isEmpty then invalidArg "scn" "Unfold scenario must contain at least one step."
 
-    let rec ana scn inComp =
-        match scn with
-        | [] -> inComp
-        | f :: scn_tail -> match inComp with
-                           | Value x -> ana scn_tail (toComposite(f x))
-                           | Composite x -> Composite(x |> Seq.map (ana scn))                      
+        // Applies a check/unfold rule to the given object.
+        // If the object passes the check function it is unfolded
+        // through the use of the unfold function, the results are wrapped
+        // into Values and their enumerable - into a Composite.
+        // If the object does not pass the check function it
+        // is returned as is wrapped in a Value.
+        let applyRuleAndWrapResult rule obj =
+            let (checkFunc, unfoldFunc) = rule
+            obj
+            |> checkFunc
+            |> function
+                | true -> obj |> unfoldFunc |> Seq.map Value |> Composite
+                | _ -> obj |> Value
+
+        // We pass through a sequence and apply the unfold
+        // steps to each object. Each step produces a sequence of
+        // results we pack into a new composite of values.
+        let rec getResults steps comp =
+            steps
+            |> Array.tryHead
+            |> function
+                | None -> comp
+                | Some step -> comp
+                                |> function
+                                   | Value x -> getResults (steps |> Array.tail) (x |> applyRuleAndWrapResult step)
+                                   | Composite x -> if x |> isNull then failwith "Composite sequence must not be null."
+                                                    x |> Seq.map (getResults steps) |> Composite
+        
+        getResults scn inComp
+
 
     let cata scn inSeq =
         if inSeq |> isNull then nullArg "inSeq"
