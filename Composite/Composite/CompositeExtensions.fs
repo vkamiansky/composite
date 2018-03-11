@@ -7,9 +7,6 @@ open System.Runtime.CompilerServices
 
 open FSharp.Core
 
-open DataTypes
-open Transforms
-
 [<Extension>]
 type CompositeExtensions () =
 
@@ -39,18 +36,18 @@ type CompositeExtensions () =
         if scenario |> isNull then nullArg "scenario"
         if scenario |> Array.isEmpty then invalidArg "scenario" "Unfold scenario must contain at least one rule."
 
-        ana (scenario |> Array.map (fun x -> x.CheckFunction.Invoke, x.UnfoldFunction.Invoke)) source
+        Comp.unfold (scenario |> Array.map (fun x -> x.CheckFunction.Invoke, x.UnfoldFunction.Invoke)) source
 
 module C =
 
     let ToForest (inputComposite: 'a Composite) =
-        Enumerable.AsEnumerable(toForest inputComposite)
+        Enumerable.AsEnumerable(Comp.inner inputComposite)
 
     let ToFlat (inputComposite: 'a Composite) =
-        Enumerable.AsEnumerable(toFlat inputComposite)
+        Enumerable.AsEnumerable(Seq.ofComp inputComposite)
 
     let Composite (inputSequence: IEnumerable<'a Composite>) =
         Composite inputSequence
 
     let Value value =
-        Value value        
+        Value value

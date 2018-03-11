@@ -8,12 +8,12 @@ namespace Composite.Cs.Tests
 {
     internal static class CompositeExtensions
     {
-        public static string AsString<T>(this DataTypes.Composite<T> source, Func<T, string> stringifyFunc)
+        public static string AsString<T>(this Composite<T> source, Func<T, string> toStringFunc)
         {
-            if(source is DataTypes.Composite<T>.Composite composite)
-                return string.Format("[ {0} ]", string.Join(", ", composite.Item.Select(x => x.AsString(stringifyFunc))));
+            if(source is Composite<T>.Composite composite)
+                return string.Format("[ {0} ]", string.Join(", ", composite.Item.Select(x => x.AsString(toStringFunc))));
             else
-                return stringifyFunc((source as DataTypes.Composite<T>.Value).Item);
+                return toStringFunc((source as Composite<T>.Value).Item);
         }
     }
 }

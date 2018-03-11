@@ -5,8 +5,6 @@ open System.Collections.Generic
 open System.Linq
 open System.Runtime.CompilerServices
 
-open Transforms
-
 [<Extension>]
 type EnumerableExtensions () =
 
@@ -33,7 +31,7 @@ type EnumerableExtensions () =
         if source |> isNull then nullArg "source"
         if numberPartitions <= 0 then invalidArg "numberPartitions" "Number of partitions must not be 0 or negative."
 
-        toPartitioned numberPartitions source |> Array.map Enumerable.AsEnumerable
+        Seq.partition numberPartitions source |> Array.map Enumerable.AsEnumerable
 
     [<Extension>]
     /// <summary>
@@ -86,7 +84,7 @@ type EnumerableExtensions () =
         if source |> isNull then nullArg "source"
         if batchSize <= 0 then invalidArg "batchSize" "Batch size must not be 0 or negative."
 
-        Enumerable.AsEnumerable(toBatched batchSize getElementSize.Invoke source)
+        Enumerable.AsEnumerable(Seq.chunkByWeight batchSize getElementSize.Invoke source)
 
     [<Extension>]
     /// <summary>
@@ -122,4 +120,4 @@ type EnumerableExtensions () =
                                                     |> function
                                                         | null | [||] -> invalidArg "scenario" "A check-transform rule must contain at least one check function."
                                                         | funcs -> funcs |> Array.map (fun x -> x.Invoke) , p.TransformFunction.Invoke)
-        cata scn source
+        Seq.accumulateCollect scn source

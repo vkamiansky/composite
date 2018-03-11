@@ -8,8 +8,8 @@ using Composite;
 
 namespace Composite.Cs.Tests
 {
-    using SimpleComposite = DataTypes.Composite<Simple>.Composite;
-    using SimpleValue = DataTypes.Composite<Simple>.Value;
+    using SimpleComposite = Composite<Simple>.Composite;
+    using SimpleValue = Composite<Simple>.Value;
 
     public class AnaTests
     {
