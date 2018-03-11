@@ -17,6 +17,7 @@
     <Compile Include="CheckUnfoldRule.fs"/>
     <Compile Include="CompositeExtensions.fs" />
     <Compile Include="EnumerableExtensions.fs" />
+    <Compile Include="C.fs" />
   </ItemGroup>
 
 </Project>

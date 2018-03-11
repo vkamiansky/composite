@@ -21,16 +21,16 @@ namespace Composite.Cs.Tests
                 C.Value(new Simple { Number = 2, }),
             }.AsLimited(2));
 
-            C.ToForest(obj).Take(2).ToArray();
+            obj.ToForest().Take(2).ToArray();
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                C.ToForest(obj).Take(3).ToArray();
+                obj.ToForest().Take(3).ToArray();
             });
         }
 
         [Fact]
-        public void ToFlatTest()
+        public void AsEnumerableTest()
         {
             var obj = C.Composite(new[] {
                 C.Value(new Simple { Number = 1, }),
@@ -45,7 +45,7 @@ namespace Composite.Cs.Tests
                 C.Value(new Simple { Number = 6, }),
             }.AsLimited(2));
 
-            var result = C.ToFlat(obj).Take(4).ToArray();
+            var result = obj.AsEnumerable().Take(4).ToArray();
             for (int i = 1; i <= 4; i++)
             {
                 Assert.Equal(i, result[i - 1].Number);
@@ -53,7 +53,7 @@ namespace Composite.Cs.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                C.ToFlat(obj).Take(5).ToArray();
+                obj.AsEnumerable().Take(5).ToArray();
             });
         }
     }

@@ -7,7 +7,7 @@ module Comp =
 
     ///<summary>Returns the sequence of inner components for composite <c>source</c> or a sequence with <c>source</c> as one element for value <c>source</c>.</summary>
     ///<param name="source">The input <c>Composite</c>.</param>
-    let inner (source: 'T Composite) =
+    let components (source: 'T Composite) =
         match source with
         | Composite x -> x
         | x -> seq { yield x }
