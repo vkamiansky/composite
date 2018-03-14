@@ -12,6 +12,18 @@ module Comp =
         | Composite x -> x
         | x -> seq { yield x }
 
+    let rec fork (predicate: 'T -> bool) (mapping: 'T -> seq<'T>) (source: 'T Composite) =
+        match source with
+        | Composite x -> x |> Seq.map (fork predicate mapping) |> Composite
+        | Value x -> if predicate x
+                     then mapping x |> Seq.map Value |> Composite
+                     else source
+
+    let rec map (mapping: 'TIn -> 'TOut) (source: 'TIn Composite) =
+        match source with
+        | Composite x -> x |> Seq.map (map mapping) |> Composite
+        | Value x -> x |> mapping |> Value
+
     ///<summary>Unfolds the input sequence according to the given scenario.</summary>
     ///<param name="scenario">An array of check and unfold rules. The rules are applied according to their order in the scenario. Each rule is not applied to the results of its application. The rule consists of a check function determining whether the element can be unfolded and an unfold function defining the unfold of an element into a sequence.</param>
     ///<param name="source">The input <c>Composite</c>.</param>
