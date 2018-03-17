@@ -97,7 +97,7 @@ module Seq =
 
         source |> fetchElementFunction |> getChunks [||] 0
 
-    ///<summary>Finds elements in the input sequence to populate parameter arrays, applies respective transform functions to populated arrays, and concatenates the results.</summary>
+    ///<summary>Finds elements in the input sequence to populate parameter arrays, applies the respective transform functions to populated arrays, and concatenates the results.</summary>
     ///<param name="rules">An array of check and transform rules. Each rule has an array of check functions (i-th one checking if the element is fit to fill the i-th position in the parameters' array), and a function transforming the parameters array into a result sequence.</param>
     ///<param name="source">The input sequence.</param>
     ///<exception cref="System.ArgumentNullException">Thrown when <c>rules</c> or <c>source</c> is null.</exception>

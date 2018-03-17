@@ -19,7 +19,7 @@ type EnumerableExtensions () =
         if source |> isNull then nullArg "source"
         if numberPartitions <= 0 then invalidArg "numberPartitions" "Number of partitions must not be 0 or negative."
 
-        Seq.partition numberPartitions source |> Array.map Enumerable.AsEnumerable
+        source |> Seq.partition numberPartitions |> Array.map Enumerable.AsEnumerable
 
     [<Extension>]
     ///<summary>Splits the <c>source</c> enumerable into pages of size at most <c>pageSize</c>.</summary>
@@ -32,7 +32,7 @@ type EnumerableExtensions () =
         if source |> isNull then nullArg "source"
         if pageSize <= 0 then invalidArg "pageSize" "Page size must not be 0 or negative."
 
-        Enumerable.AsEnumerable(Seq.chunkBySize pageSize source)
+        source |> Seq.chunkBySize pageSize |> Enumerable.AsEnumerable
 
     [<Extension>]
     ///<summary>Splits the <c>source</c> enumerable into batches with total size of each multi-item batch no greater than <c>batchSize</c>.</summary>
@@ -46,23 +46,23 @@ type EnumerableExtensions () =
         if source |> isNull then nullArg "source"
         if batchSize <= 0 then invalidArg "batchSize" "Batch size must not be 0 or negative."
 
-        Enumerable.AsEnumerable(Seq.chunkByWeight batchSize getElementSize.Invoke source)
+        source |> Seq.chunkByWeight batchSize getElementSize.Invoke |> Enumerable.AsEnumerable
 
     [<Extension>]
-    ///<summary>Selects arrays of values from <c>source</c>, transforms them, and returns the results as an output enumerable.</summary>
+    ///<summary>Finds elements in the input sequence to populate parameter arrays, applies the respective transform functions to populated arrays, and concatenates the results.</summary>
     ///<param name="source">The source enumerable.</param>
-    ///<param name="scenario">An array of selection and transformation rules.</param>
+    ///<param name="rules">An array of accumulation and transformation rules.</param>
     ///<typeparam name="TSource">The type of elements in the source enumerable.</typeparam>
     ///<typeparam name="TResult">The type of elements in the result enumerable.</typeparam>
-    ///<returns>An enumerable of results produced from source elements by using the specified selection and transformation scenario.</returns>
-    ///<exception cref="System.ArgumentException">Thrown when <c>scenario</c> has rules with null or empty arrays of check functions.</exception>
-    ///<exception cref="System.ArgumentNullException">Thrown when <c>source</c> or <c>scenario</c> is null.</exception>
-    static member inline Cata (source: IEnumerable<'TSource>) (scenario: CheckTransformRule<'TSource, 'TResult>[]) =
+    ///<returns>An enumerable of results produced from source elements by using the specified accumulation and transformation rules.</returns>
+    ///<exception cref="System.ArgumentException">Thrown when some of the <c>rules</c> have null or empty arrays of check functions.</exception>
+    ///<exception cref="System.ArgumentNullException">Thrown when <c>source</c> or <c>rules</c> is null.</exception>
+    static member inline AccumulateSelectMany (source: IEnumerable<'TSource>) (rules: CheckTransformRule<'TSource, 'TResult>[]) =
         if source |> isNull then nullArg "source"
-        if scenario |> isNull then nullArg "scenario"
+        if rules |> isNull then nullArg "scenario"
 
-        let scn = scenario |> Array.map (fun p -> p.CheckFunctions 
+        let rulesParam = rules |> Array.map (fun p -> p.CheckFunctions 
                                                     |> function
                                                         | null | [||] -> invalidArg "scenario" "A check-transform rule must contain at least one check function."
                                                         | funcs -> funcs |> Array.map (fun x -> x.Invoke) , p.TransformFunction.Invoke)
-        Seq.accumulateCollect scn source
+        source |> Seq.accumulateCollect rulesParam

@@ -6,12 +6,16 @@ open FSharp.Core
 module Comp =
 
     ///<summary>Returns the sequence of inner components for composite <c>source</c> or a sequence with <c>source</c> as one element for value <c>source</c>.</summary>
-    ///<param name="source">The input <c>Composite</c>.</param>
+    ///<param name="source">The input composite.</param>
     let components (source: 'T Composite) =
         match source with
         | Composite x -> x
         | x -> seq { yield x }
 
+    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted by composites containing values produced by using the given function.</summary>
+    ///<param name="predicate">A function to test whether each value from the input composite should be transformed into a composite.</param>
+    ///<param name="mapping">An object-to-sequence function to transform values from the input composite into composites.</param>
+    ///<param name="source">The input composite.</param>
     let rec fork (predicate: 'T -> bool) (mapping: 'T -> seq<'T>) (source: 'T Composite) =
         match source with
         | Composite x -> x |> Seq.map (fork predicate mapping) |> Composite
@@ -19,46 +23,12 @@ module Comp =
                      then mapping x |> Seq.map Value |> Composite
                      else source
 
+    ///<summary>Builds a new composite based on the <c>source</c> in which the values are the results of applying the given function to each of the values in the input composite.</summary>
+    ///<param name="mapping">A function to transform values from the input composite.</param>
+    ///<param name="source">The input <c>Composite</c>.</param>
+    ///<typeparam name="TIn">The type of payload objects in the input composite.</typeparam>
+    ///<typeparam name="TOut">The type of payload objects in the output composite.</typeparam>
     let rec map (mapping: 'TIn -> 'TOut) (source: 'TIn Composite) =
         match source with
         | Composite x -> x |> Seq.map (map mapping) |> Composite
         | Value x -> x |> mapping |> Value
-
-    ///<summary>Unfolds the input sequence according to the given scenario.</summary>
-    ///<param name="scenario">An array of check and unfold rules. The rules are applied according to their order in the scenario. Each rule is not applied to the results of its application. The rule consists of a check function determining whether the element can be unfolded and an unfold function defining the unfold of an element into a sequence.</param>
-    ///<param name="source">The input <c>Composite</c>.</param>
-    ///<exception cref="System.ArgumentNullException">Thrown when <c>scenario</c> is null.</exception>
-    ///<exception cref="System.ArgumentException">Thrown when <c>scenario</c> contains no unfold rules.</exception>
-    let unfold (scenario: (('T -> bool) * ('T -> seq<'T>))[]) source =
-        if scenario |> isNull then nullArg "scenario"
-        if scenario |> Array.isEmpty then invalidArg "scenario" "Unfold scenario must contain at least one step."
-
-        // Applies a check/unfold rule to the given object.
-        // If the object passes the check function it is unfolded
-        // through the use of the unfold function, the results are wrapped
-        // into Values and their enumerable - into a Composite.
-        // If the object does not pass the check function it
-        // is returned as is wrapped in a Value.
-        let applyRuleAndWrapResult rule obj =
-            let (checkFunc, unfoldFunc) = rule
-            obj
-            |> checkFunc
-            |> function
-                | true -> obj |> unfoldFunc |> Seq.map Value |> Composite
-                | _ -> obj |> Value
-
-        // We pass through a sequence and apply the unfold
-        // steps to each object. Each step produces a sequence of
-        // results we pack into a new composite of values.
-        let rec getResults steps comp =
-            steps
-            |> Array.tryHead
-            |> function
-                | None -> comp
-                | Some step -> comp
-                                |> function
-                                   | Value x -> getResults (steps |> Array.tail) (x |> applyRuleAndWrapResult step)
-                                   | Composite x -> if x |> isNull then failwith "Composite sequence must not be null."
-                                                    x |> Seq.map (getResults steps) |> Composite
-        
-        getResults scenario source

@@ -1,6 +1,8 @@
 namespace Composite
 
-open System.Linq;
+open System
+open System.Collections.Generic
+open System.Linq
 open System.Runtime.CompilerServices
 
 open FSharp.Core
@@ -9,29 +11,33 @@ open FSharp.Core
 type CompositeExtensions () =
 
     [<Extension>]
-    ///<summary>Unfolds the source Composite according to the specified array of steps.</summary>
-    ///<param name="source">The source composite.</param>
-    ///<param name="scenario">An array element-to-enumerable transformation rules.</param>
-    ///<typeparam name="T">The type of payload elements in the composite.</typeparam>
-    ///<returns>An unfolded composite.</returns>
-    ///<exception cref="System.ArgumentException">Thrown when <c>scenario</c> is empty.</exception>
-    ///<exception cref="System.ArgumentNullException">Thrown when <c>scenario</c> is null.</exception>
-    static member inline Ana (source: 'T Composite) (scenario: CheckUnfoldRule<'T>[]) =
-        if scenario |> isNull then nullArg "scenario"
-        if scenario |> Array.isEmpty then invalidArg "scenario" "Unfold scenario must contain at least one rule."
-
-        Comp.unfold (scenario |> Array.map (fun x -> x.CheckFunction.Invoke, x.UnfoldFunction.Invoke)) source
+    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted by composites containing values produced by using the given function.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<param name="predicate">A function to test whether each value from the input composite should be transformed into a composite.</param>
+    ///<param name="mapping">An object-to-sequence function to transform values from the input composite into composites.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
+    static member inline Fork (source: 'T Composite) (predicate: Func<'T, bool>) (mapping: Func<'T, IEnumerable<'T>>) =
+        source |> Comp.fork predicate.Invoke mapping.Invoke
 
     [<Extension>]
-    ///<summary>Returns the inner forest of a composite <c>source</c> or a single-element enumerable with a value <c>source</c>.</summary>
-    ///<param name="source">The input <c>Composite</c>.</param>
-    ///<typeparam name="T">The type of payload elements in the <c>Composite</c>.</typeparam>
-    static member inline ToForest (source: 'T Composite) =
-        Enumerable.AsEnumerable(Comp.components source)
+    ///<summary>Builds a new composite based on the source in which the values are the results of applying the given function to each of the values in the input composite.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<param name="mapping">A function to transform values from the input composite.</param>
+    ///<typeparam name="TIn">The type of payload objects in the input composite.</typeparam>
+    ///<typeparam name="TOut">The type of payload objects in the output composite.</typeparam>
+    static member inline Select (source: 'TIn Composite) (mapping: Func<'TIn, 'TOut>) =
+        source |> Comp.map mapping.Invoke
 
     [<Extension>]
-    ///<summary>Views the given <c>Composite</c> as an enumerable.</summary>
-    ///<param name="source">The input <c>Composite</c>.</param>
-    ///<typeparam name="T">The type of payload elements in the <c>Composite</c>.</typeparam>
+    ///<summary>Returns the enumerable of components of the input composite.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
+    static member inline ToComponents (source: 'T Composite) =
+        source |> Comp.components |> Enumerable.AsEnumerable
+
+    [<Extension>]
+    ///<summary>Views the given composite as an enumerable.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
     static member inline AsEnumerable (source: 'T Composite) =
-        Enumerable.AsEnumerable(Seq.ofComp source)
+        source |> Seq.ofComp |> Enumerable.AsEnumerable
