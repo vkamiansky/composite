@@ -66,8 +66,8 @@ namespace Composite.Cs.Tests.Composites
                 _ => new[] { new Simple { Number = 4, }, new Simple { Number = 5, }, new Simple { Number = 6, } }.AsLimited(2));
 
             var result = forked.AsEnumerable()
-                .Take(2)
-                .ToArray();
+                               .Take(2)
+                               .ToArray();
 
             Assert.Equal(4, result[0].Number);
             Assert.Equal(5, result[1].Number);
@@ -85,14 +85,9 @@ namespace Composite.Cs.Tests.Composites
 
             var forked = obj.Fork(
                 x => x.Number == 1 ? true : throw new InvalidOperationException(),
-                _ => new[] { new Simple { Number = 4, }, new Simple { Number = 5, } });
+                _ => new[] { new Simple(), new Simple(), });
 
-            var result = forked.AsEnumerable()
-                               .Take(2)
-                               .ToArray();
-
-            Assert.Equal(4, result[0].Number);
-            Assert.Equal(5, result[1].Number);
+            forked.AsEnumerable().Take(2).ToArray();
 
             Assert.Throws<InvalidOperationException>(() => forked.AsEnumerable().Take(3).ToArray());
         }
@@ -101,8 +96,8 @@ namespace Composite.Cs.Tests.Composites
         public void InvalidParametersTest()
         {
             var obj = C.Composite(new[] {
-                C.Value( new Simple { Number = 1, } ),
-                C.Value( new Simple { Number = 6, } ),
+                C.Value(new Simple()),
+                C.Value(new Simple()),
             });
 
             Assert.Throws<ArgumentNullException>(() => obj.Fork(null, null));
