@@ -1,56 +1,43 @@
 namespace Composite
 
+open System
 open System.Collections.Generic
-open System.Linq;
+open System.Linq
 open System.Runtime.CompilerServices
 
-
 open FSharp.Core
-
-open DataTypes
-open Transforms
 
 [<Extension>]
 type CompositeExtensions () =
 
     [<Extension>]
-    /// <summary>
-    /// Unfolds the source Composite according to the specified array of steps.
-    /// </summary>
-    /// <param name="source">
-    /// The source composite.
-    /// </param>
-    /// <param name="scenario">
-    /// An array element-to-enumerable transformation rules.
-    /// </param>
-    /// <typeparam name="T">
-    /// The type of payload elements in the composite.
-    /// </typeparam>
-    /// <returns>
-    /// An unfolded composite.
-    /// </returns>
-    /// <exception cref="System.ArgumentException">
-    /// Thrown when <c>scenario</c> is empty.
-    /// </exception>
-    /// <exception cref="System.ArgumentNullException">
-    /// Thrown when <c>scenario</c> is null.
-    /// </exception>
-    static member inline Ana (source: 'T Composite) (scenario: CheckUnfoldRule<'T>[]) =
-        if scenario |> isNull then nullArg "scenario"
-        if scenario |> Array.isEmpty then invalidArg "scenario" "Unfold scenario must contain at least one rule."
+    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted for composites containing the objects produced by using the given function as their value components.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<param name="predicate">A function to test whether each value in the input composite should be transformed into a composite.</param>
+    ///<param name="mapping">A function to transform objects from the input composite.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
+    static member inline Fork (source: 'T Composite) (predicate: Func<'T, bool>) (mapping: Func<'T, IEnumerable<'T>>) =
+        source |> Comp.fork predicate.Invoke mapping.Invoke
 
-        ana (scenario |> Array.map (fun x -> x.CheckFunction.Invoke, x.UnfoldFunction.Invoke)) source
+    [<Extension>]
+    ///<summary>Builds a new composite based on the source in which the values are the results of applying the given function to each of the values in the input composite.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<param name="mapping">A function to transform values from the input composite.</param>
+    ///<typeparam name="TIn">The type of payload objects in the input composite.</typeparam>
+    ///<typeparam name="TOut">The type of payload objects in the output composite.</typeparam>
+    static member inline Select (source: 'TIn Composite) (mapping: Func<'TIn, 'TOut>) =
+        source |> Comp.map mapping.Invoke
 
-module C =
+    [<Extension>]
+    ///<summary>Returns the enumerable of components of the input composite.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
+    static member inline ToComponents (source: 'T Composite) =
+        source |> Comp.components |> Enumerable.AsEnumerable
 
-    let ToForest (inputComposite: 'a Composite) =
-        Enumerable.AsEnumerable(toForest inputComposite)
-
-    let ToFlat (inputComposite: 'a Composite) =
-        Enumerable.AsEnumerable(toFlat inputComposite)
-
-    let Composite (inputSequence: IEnumerable<'a Composite>) =
-        Composite inputSequence
-
-    let Value value =
-        Value value        
+    [<Extension>]
+    ///<summary>Views the given composite as an enumerable.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
+    static member inline AsEnumerable (source: 'T Composite) =
+        source |> Seq.ofComp |> Enumerable.AsEnumerable
