@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
 
-using Composite;
 using Composite.Cs.Tests.Enumerables;
 
 namespace Composite.Cs.Tests.Composites
