@@ -6,7 +6,7 @@ using Xunit;
 
 using Composite;
 
-namespace Composite.Cs.Tests
+namespace Composite.Cs.Tests.Enumerables
 {
     public class AccumulateSelectManyTests
     {

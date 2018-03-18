@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Composite.Cs.Tests
+namespace Composite.Cs.Tests.Enumerables
 {
     internal static class EnumerableExtensions
     {

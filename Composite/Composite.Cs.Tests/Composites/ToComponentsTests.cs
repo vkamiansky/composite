@@ -5,8 +5,9 @@ using System.Linq;
 using Xunit;
 
 using Composite;
+using Composite.Cs.Tests.Enumerables;
 
-namespace Composite.Cs.Tests
+namespace Composite.Cs.Tests.Composites
 {
     public class ToComponentsTests
     {

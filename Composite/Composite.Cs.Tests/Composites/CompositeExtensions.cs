@@ -4,7 +4,7 @@ using System.Linq;
 
 using Composite;
 
-namespace Composite.Cs.Tests
+namespace Composite.Cs.Tests.Composites
 {
     internal static class CompositeExtensions
     {

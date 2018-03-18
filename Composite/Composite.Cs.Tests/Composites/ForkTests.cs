@@ -6,7 +6,7 @@ using Xunit;
 
 using Composite;
 
-namespace Composite.Cs.Tests
+namespace Composite.Cs.Tests.Composites
 {
     using SimpleComposite = Composite<Simple>.Composite;
     using SimpleValue = Composite<Simple>.Value;
