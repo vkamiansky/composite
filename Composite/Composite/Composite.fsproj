@@ -13,7 +13,7 @@
     <Compile Include="Composite.fs" />
     <Compile Include="Seq.fs" />
     <Compile Include="Comp.fs" />
-    <Compile Include="CheckTransformRule.fs"/>
+    <Compile Include="AccumulateTransformRule.fs"/>
     <Compile Include="CompositeExtensions.fs" />
     <Compile Include="EnumerableExtensions.fs" />
     <Compile Include="C.fs" />

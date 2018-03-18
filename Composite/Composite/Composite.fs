@@ -1,5 +1,5 @@
 namespace Composite
 
-    type 'a Composite =
-        | Value of 'a
-        | Composite of seq<Composite<'a>>
+    type 'T Composite =
+        | Value of 'T
+        | Composite of seq<Composite<'T>>

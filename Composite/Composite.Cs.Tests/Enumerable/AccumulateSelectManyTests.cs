@@ -16,8 +16,8 @@ namespace Composite.Cs.Tests
             var inputSeq = Enumerable.Range(1, 10)
                 .Select(x => new Simple { Number = x, });
 
-            var checkTransformRules = new[] {
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+            var accumulateTransformRules = new[] {
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 5,
                 }, (x) => {
                     var num = x[0].Number;
@@ -25,12 +25,12 @@ namespace Composite.Cs.Tests
                 }),
             };
 
-            var result = inputSeq.AsLimited(5).AccumulateSelectMany(checkTransformRules).ToArray();
+            var result = inputSeq.AsLimited(5).AccumulateSelectMany(accumulateTransformRules).ToArray();
             Assert.Equal(new[] { "52", "53", "54" }, result);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                inputSeq.AsLimited(4).AccumulateSelectMany(checkTransformRules).ToArray();
+                inputSeq.AsLimited(4).AccumulateSelectMany(accumulateTransformRules).ToArray();
             });
         }
 
@@ -40,14 +40,14 @@ namespace Composite.Cs.Tests
             var inputSeq = Enumerable.Range(1, 10)
                 .Select(x => new Simple { Number = x, });
 
-            var checkTransformRules = new[] {
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+            var accumulateTransformRules = new[] {
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 5,
                 }, (x) => {
                     var num = x[0].Number;
                     return new[]{ num + "2", num + "3", num + "4",}.AsLimited(2);
                 }),
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 3,
                     (x) => x.Number == 4,
                 }, (x) => {
@@ -55,12 +55,12 @@ namespace Composite.Cs.Tests
                 })
             };
 
-            var result = inputSeq.AccumulateSelectMany(checkTransformRules).Take(4).ToArray();
+            var result = inputSeq.AccumulateSelectMany(accumulateTransformRules).Take(4).ToArray();
             Assert.Equal(new[] { "32", "43", "52", "53" }, result);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                inputSeq.AccumulateSelectMany(checkTransformRules).Take(5).ToArray();
+                inputSeq.AccumulateSelectMany(accumulateTransformRules).Take(5).ToArray();
             });
         }
 
@@ -72,19 +72,19 @@ namespace Composite.Cs.Tests
                 .WithSideEffect(_ => callsCount++)
                 .Select(x => new Simple { Number = x, });
 
-            var checkTransformRules = new[] {
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+            var accumulateTransformRules = new[] {
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 5,
                 }, (x) => new[]{ "2" }),
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 3,
                 }, (x) => new[]{ "3" }),
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 3,
                 }, (x) => new[]{ "4" }),
             };
 
-            inputSeq.AccumulateSelectMany(checkTransformRules).ToArray();
+            inputSeq.AccumulateSelectMany(accumulateTransformRules).ToArray();
             Assert.Equal(5, callsCount);
         }
 
@@ -95,19 +95,19 @@ namespace Composite.Cs.Tests
             var inputSeq = Enumerable.Range(1, 10)
                 .Select(x => new Simple { Number = x, });
 
-            var checkTransformRules = new[] {
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+            var accumulateTransformRules = new[] {
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 5,
                 }, (x) => new[]{ "2", "3", "4" }.WithSideEffect(_ => callsCount++)),
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 3,
                 }, (x) => new[]{ "6", "9", "8" }.WithSideEffect(_ => callsCount++)),
-                new CheckTransformRule<Simple, string>(new Func<Simple, bool>[]{
+                new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 3,
                 }, (x) => new[]{ "7", "5", "1" }.WithSideEffect(_ => callsCount++)),
             };
 
-            inputSeq.AccumulateSelectMany(checkTransformRules).ToArray();
+            inputSeq.AccumulateSelectMany(accumulateTransformRules).ToArray();
             Assert.Equal(9, callsCount);
         }
 
@@ -117,7 +117,7 @@ namespace Composite.Cs.Tests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 var goodRules = new[] {
-                    new CheckTransformRule<int, string>(
+                    new AccumulateTransformRule<int, string>(
                         new Func<int, bool>[]{(x) => true,},
                         (x) => new[] {""}),
                         };
@@ -135,7 +135,7 @@ namespace Composite.Cs.Tests
             Assert.Throws<ArgumentException>(() =>
             {
                 var badRules = new[] {
-                    new CheckTransformRule<int, string>(
+                    new AccumulateTransformRule<int, string>(
                         new Func<int, bool>[]{},(x) => new[] {""}),
                         };
                 goodSource.AccumulateSelectMany<int, string>(badRules);
@@ -146,7 +146,7 @@ namespace Composite.Cs.Tests
         public void TrivialScenarioTest()
         {
             var noGoSource = Enumerable.Range(1, 10).AsLimited(0);
-            var trivialRules = new CheckTransformRule<int, string>[] { };
+            var trivialRules = new AccumulateTransformRule<int, string>[] { };
             var result = noGoSource.AccumulateSelectMany<int, string>(trivialRules).ToArray();
             Assert.Empty(result);
         }

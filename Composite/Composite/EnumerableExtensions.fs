@@ -35,7 +35,7 @@ type EnumerableExtensions () =
         source |> Seq.chunkBySize pageSize |> Enumerable.AsEnumerable
 
     [<Extension>]
-    ///<summary>Splits the <c>source</c> enumerable into batches with total size of each multi-item batch no greater than <c>batchSize</c>.</summary>
+    ///<summary>Divides the input sequence into batches of as many elements as possible their total size not exceeding <c>batchSize</c> but not less than one element per batch.</summary>
     ///<param name="source">The source enumerable.</param>
     ///<param name="batchSize">The maximum total size of a multi-item batch.</param>
     ///<param name="getElementSize">A function that calculates the size of an element.</param>
@@ -49,7 +49,7 @@ type EnumerableExtensions () =
         source |> Seq.chunkByWeight batchSize getElementSize.Invoke |> Enumerable.AsEnumerable
 
     [<Extension>]
-    ///<summary>Finds elements in the input sequence to populate parameter arrays, applies the respective transform functions to populated arrays, and concatenates the results.</summary>
+    ///<summary>Finds elements in the input sequence to accumulate them in arrays, applies the respective transform functions to populated arrays, and concatenates the results.</summary>
     ///<param name="source">The source enumerable.</param>
     ///<param name="rules">An array of accumulation and transformation rules.</param>
     ///<typeparam name="TSource">The type of elements in the source enumerable.</typeparam>
@@ -57,12 +57,12 @@ type EnumerableExtensions () =
     ///<returns>An enumerable of results produced from source elements by using the specified accumulation and transformation rules.</returns>
     ///<exception cref="System.ArgumentException">Thrown when some of the <c>rules</c> have null or empty arrays of check functions.</exception>
     ///<exception cref="System.ArgumentNullException">Thrown when <c>source</c> or <c>rules</c> is null.</exception>
-    static member inline AccumulateSelectMany (source: IEnumerable<'TSource>) (rules: CheckTransformRule<'TSource, 'TResult>[]) =
+    static member inline AccumulateSelectMany (source: IEnumerable<'TSource>) (rules: AccumulateTransformRule<'TSource, 'TResult>[]) =
         if source |> isNull then nullArg "source"
-        if rules |> isNull then nullArg "scenario"
+        if rules |> isNull then nullArg "rules"
 
-        let rulesParam = rules |> Array.map (fun p -> p.CheckFunctions 
+        let rulesParam = rules |> Array.map (fun p -> p.FindPredicates 
                                                     |> function
-                                                        | null | [||] -> invalidArg "scenario" "A check-transform rule must contain at least one check function."
+                                                        | null | [||] -> invalidArg "rules" "An accumulate-transform rule must contain at least one find predicate."
                                                         | funcs -> funcs |> Array.map (fun x -> x.Invoke) , p.TransformFunction.Invoke)
         source |> Seq.accumulateCollect rulesParam

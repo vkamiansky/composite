@@ -11,7 +11,7 @@ namespace Composite.Cs.Tests
     public class ToComponentsTests
     {
         [Fact]
-        public void TransformationTest(){
+        public void LazyOutputTest(){
             var obj = C.Composite (new [] {
                 C.Value(new Simple { Number = 2, }),
                 C.Composite(new [] {

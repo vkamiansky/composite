@@ -11,10 +11,10 @@ open FSharp.Core
 type CompositeExtensions () =
 
     [<Extension>]
-    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted by composites containing values produced by using the given function.</summary>
+    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted for composites containing the objects produced by using the given function as their value components.</summary>
     ///<param name="source">The input composite.</param>
-    ///<param name="predicate">A function to test whether each value from the input composite should be transformed into a composite.</param>
-    ///<param name="mapping">An object-to-sequence function to transform values from the input composite into composites.</param>
+    ///<param name="predicate">A function to test whether each value in the input composite should be transformed into a composite.</param>
+    ///<param name="mapping">A function to transform objects from the input composite.</param>
     ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
     static member inline Fork (source: 'T Composite) (predicate: Func<'T, bool>) (mapping: Func<'T, IEnumerable<'T>>) =
         source |> Comp.fork predicate.Invoke mapping.Invoke

@@ -7,7 +7,7 @@ open System.Threading
 module Seq =
 
     ///<summary>Views the given <c>Composite</c> as a sequence.</summary>
-    ///<param name="source">The input <c>Composite</c>.</param>
+    ///<param name="source">The input composite.</param>
     let rec ofComp (source: 'T Composite) =
        seq {
             match source with
@@ -15,7 +15,7 @@ module Seq =
                | Composite x -> yield! x |> Seq.collect ofComp
         }
 
-    ///<summary>Views the input sequence as a function fetching its next element.</summary>
+    ///<summary>Creates a function to fetch elements from the input sequence.</summary>
     ///<param name="source">The input sequence.</param>
     ///<exception cref="System.ArgumentNullException">Thrown when <c>source</c> is null.</exception>
     let fetchElementFunction (source: seq<'T>) =
@@ -59,7 +59,7 @@ module Seq =
 
         Array.init numParts (fun _ -> getSeq ())
 
-    ///<summary>Divides the input sequence into chunks of as many elements as possible their total weight not exceeding <c>chunkWeight</c> but not than one element per batch.</summary>
+    ///<summary>Divides the input sequence into chunks of as many elements as possible their total weight not exceeding <c>chunkWeight</c> but not less than one element per batch.</summary>
     ///<param name="chunkWeight">The preferred maximum weight of each chunk.</param>
     ///<param name="weigh">The function used to weigh elements.</param>
     ///<param name="source">The input sequence.</param>
@@ -97,8 +97,8 @@ module Seq =
 
         source |> fetchElementFunction |> getChunks [||] 0
 
-    ///<summary>Finds elements in the input sequence to populate parameter arrays, applies the respective transform functions to populated arrays, and concatenates the results.</summary>
-    ///<param name="rules">An array of check and transform rules. Each rule has an array of check functions (i-th one checking if the element is fit to fill the i-th position in the parameters' array), and a function transforming the parameters array into a result sequence.</param>
+    ///<summary>Finds elements in the input sequence to accumulate them in arrays, applies the respective transform functions to populated arrays, and concatenates the results.</summary>
+    ///<param name="rules">An array of accumulate and transform rules. Each rule has an array of find predicates (i-th one checking if the element is fit to fill the i-th position in the accumulator array), and a function transforming the accumulated object into a result sequence.</param>
     ///<param name="source">The input sequence.</param>
     ///<exception cref="System.ArgumentNullException">Thrown when <c>rules</c> or <c>source</c> is null.</exception>
     ///<exception cref="System.ArgumentException">Thrown when <c>rules</c> contains rules with no check functions.</exception>
@@ -107,11 +107,11 @@ module Seq =
     let accumulateCollect (rules: (('TIn -> bool)[] * ('TIn[] -> seq<'TOut>))[]) (source: seq<'TIn>) =
         if source |> isNull then nullArg "source"
         if rules |> isNull then nullArg "rules"
-        if rules |> Array.exists (fun (funcs, _) -> funcs |> isNull || funcs |> Array.isEmpty) then invalidArg "rules" "A check-transform rule must contain at least one check function."
+        if rules |> Array.exists (fun (funcs, _) -> funcs |> isNull || funcs |> Array.isEmpty) then invalidArg "rules" "An accumulate-transform rule must contain at least one find predicate."
 
         // We initialize the frames
         // Each frame contains:
-        // 1) an array of check functions;
+        // 1) an array of find predicates;
         //    The i-th function returns whether the seq element is fit to be i-th parameter
         //    of the transform function
         // 2) a transform function.

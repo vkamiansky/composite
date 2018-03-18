@@ -5,16 +5,16 @@ open FSharp.Core
 [<RequireQualifiedAccess>]
 module Comp =
 
-    ///<summary>Returns the sequence of inner components for composite <c>source</c> or a sequence with <c>source</c> as one element for value <c>source</c>.</summary>
+    ///<summary>Returns the sequence of components of the input composite.</summary>
     ///<param name="source">The input composite.</param>
     let components (source: 'T Composite) =
         match source with
         | Composite x -> x
         | x -> seq { yield x }
 
-    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted by composites containing values produced by using the given function.</summary>
-    ///<param name="predicate">A function to test whether each value from the input composite should be transformed into a composite.</param>
-    ///<param name="mapping">An object-to-sequence function to transform values from the input composite into composites.</param>
+    ///<summary>Builds a new composite based on the source in which the values for which the given predicate returns <c>true</c> are substituted for composites containing the objects produced by using the given function as their value components.</summary>
+    ///<param name="predicate">A function to test whether each value in the input composite should be transformed into a composite.</param>
+    ///<param name="mapping">A function to transform values from the input composite.</param>
     ///<param name="source">The input composite.</param>
     let rec fork (predicate: 'T -> bool) (mapping: 'T -> seq<'T>) (source: 'T Composite) =
         match source with
@@ -25,7 +25,7 @@ module Comp =
 
     ///<summary>Builds a new composite based on the <c>source</c> in which the values are the results of applying the given function to each of the values in the input composite.</summary>
     ///<param name="mapping">A function to transform values from the input composite.</param>
-    ///<param name="source">The input <c>Composite</c>.</param>
+    ///<param name="source">The input composite.</param>
     ///<typeparam name="TIn">The type of payload objects in the input composite.</typeparam>
     ///<typeparam name="TOut">The type of payload objects in the output composite.</typeparam>
     let rec map (mapping: 'TIn -> 'TOut) (source: 'TIn Composite) =
