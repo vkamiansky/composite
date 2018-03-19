@@ -17,6 +17,9 @@ type CompositeExtensions () =
     ///<param name="mapping">A function to transform objects from the input composite.</param>
     ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
     static member inline Fork (source: 'T Composite) (predicate: Func<'T, bool>) (mapping: Func<'T, IEnumerable<'T>>) =
+        if predicate |> isNull then nullArg "predicate"
+        if mapping |> isNull then nullArg "mapping"
+
         source |> Comp.fork predicate.Invoke mapping.Invoke
 
     [<Extension>]
@@ -26,6 +29,8 @@ type CompositeExtensions () =
     ///<typeparam name="TIn">The type of payload objects in the input composite.</typeparam>
     ///<typeparam name="TOut">The type of payload objects in the output composite.</typeparam>
     static member inline Select (source: 'TIn Composite) (mapping: Func<'TIn, 'TOut>) =
+        if mapping |> isNull then nullArg "mapping"
+
         source |> Comp.map mapping.Invoke
 
     [<Extension>]

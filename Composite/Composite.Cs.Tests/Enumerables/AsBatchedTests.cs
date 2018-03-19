@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 
 using Composite;
+using Composite.Cs.Tests.Helpers;
 
 namespace Composite.Cs.Tests.Enumerables
 {
@@ -16,7 +17,7 @@ namespace Composite.Cs.Tests.Enumerables
         public void MultiItemBatchesFormationTest()
         {
             var inputSequence = Enumerable.Range(1, 10)
-                .AsLimited(6);
+                .AllowTake(6);
             var batches = inputSequence.AsBatched(9, x => x)
                 .Take(2)
                 .ToArray();
@@ -29,7 +30,7 @@ namespace Composite.Cs.Tests.Enumerables
         public void SingleItemBatchesFormationTest()
         {
             var inputSequence = Enumerable.Range(6, 10)
-                .AsLimited(4);
+                .AllowTake(4);
             var batches = inputSequence.AsBatched(7, x => x)
                 .Take(3)
                 .ToArray();
@@ -43,7 +44,7 @@ namespace Composite.Cs.Tests.Enumerables
         public void ComplexBatchesFormationTest()
         {
             var inputSequence = new[] { 8, 1, 2, 4, 8, 1 }
-                .AsLimited(6);
+                .AllowTake(6);
             var batches = inputSequence.AsBatched(7, x => x)
                 .Take(4)
                 .ToArray();
@@ -57,7 +58,7 @@ namespace Composite.Cs.Tests.Enumerables
         [Fact]
         public void InvalidParametersTest()
         {
-            var inputSequence = Enumerable.Range(1, 10).AsLimited(0);
+            var inputSequence = Enumerable.Range(1, 10).AllowTake(0);
 
             Assert.Throws<ArgumentException>(() => inputSequence.AsBatched(0, x => x).ToArray());
             Assert.Throws<ArgumentException>(() => inputSequence.AsBatched(-1, x => x).ToArray());
@@ -71,7 +72,7 @@ namespace Composite.Cs.Tests.Enumerables
         {
             var callsCount = 0;
             var inputSequence = Enumerable.Range(1, 10)
-                .AsLimited(6);
+                .AllowTake(6);
             var batches = inputSequence.AsBatched(10, x =>
                 {
                     callsCount++;
@@ -88,7 +89,7 @@ namespace Composite.Cs.Tests.Enumerables
         {
             var callsCount = 0;
             var inputSequence = Enumerable.Range(1, 10)
-                .AsLimited(7)
+                .AllowTake(7)
                 .WithSideEffect(_ => callsCount++);
             var batches = inputSequence.AsBatched(7, x => x)
                 .Take(4)

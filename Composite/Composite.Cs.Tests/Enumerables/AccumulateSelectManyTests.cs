@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 
 using Composite;
+using Composite.Cs.Tests.Helpers;
 
 namespace Composite.Cs.Tests.Enumerables
 {
@@ -25,12 +26,12 @@ namespace Composite.Cs.Tests.Enumerables
                 }),
             };
 
-            var result = inputSeq.AsLimited(5).AccumulateSelectMany(accumulateTransformRules).ToArray();
+            var result = inputSeq.AllowTake(5).AccumulateSelectMany(accumulateTransformRules).ToArray();
             Assert.Equal(new[] { "52", "53", "54" }, result);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                inputSeq.AsLimited(4).AccumulateSelectMany(accumulateTransformRules).ToArray();
+                inputSeq.AllowTake(4).AccumulateSelectMany(accumulateTransformRules).ToArray();
             });
         }
 
@@ -45,7 +46,7 @@ namespace Composite.Cs.Tests.Enumerables
                     (x) => x.Number == 5,
                 }, (x) => {
                     var num = x[0].Number;
-                    return new[]{ num + "2", num + "3", num + "4",}.AsLimited(2);
+                    return new[]{ num + "2", num + "3", num + "4",}.AllowTake(2);
                 }),
                 new AccumulateTransformRule<Simple, string>(new Func<Simple, bool>[]{
                     (x) => x.Number == 3,
@@ -145,7 +146,7 @@ namespace Composite.Cs.Tests.Enumerables
         [Fact]
         public void TrivialScenarioTest()
         {
-            var noGoSource = Enumerable.Range(1, 10).AsLimited(0);
+            var noGoSource = Enumerable.Range(1, 10).AllowTake(0);
             var trivialRules = new AccumulateTransformRule<int, string>[] { };
             var result = noGoSource.AccumulateSelectMany<int, string>(trivialRules).ToArray();
             Assert.Empty(result);

@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 
 using Composite;
+using Composite.Cs.Tests.Helpers;
 
 namespace Composite.Cs.Tests.Enumerables
 {
@@ -15,7 +16,7 @@ namespace Composite.Cs.Tests.Enumerables
         [Fact]
         public void PagesFormationTest()
         {
-            var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
+            var inputSequence = Enumerable.Range(1, 10).AllowTake(6);
             var pages = inputSequence.AsPaged(2).Take(3).ToArray();
 
             Assert.Equal(new[] { 1, 2 }, pages[0]);
@@ -26,7 +27,7 @@ namespace Composite.Cs.Tests.Enumerables
         [Fact]
         public void InvalidParametersTest()
         {
-            var inputSequence = Enumerable.Range(1, 10).AsLimited(0);
+            var inputSequence = Enumerable.Range(1, 10).AllowTake(0);
 
             Assert.Throws<ArgumentException>(() => inputSequence.AsPaged(0).ToArray());
             Assert.Throws<ArgumentException>(() => inputSequence.AsPaged(-1).ToArray());
