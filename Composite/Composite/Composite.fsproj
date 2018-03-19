@@ -3,14 +3,20 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DocumentationFile>bin\Debug\netstandard2.0\Composite.xml</DocumentationFile>
+    <PackageId>Composite</PackageId>
+    <Version>$(APPVEYOR_BUILD_VERSION)</Version>
+    <Authors>Vitaly Kamiansky, Vladimir Ilin</Authors>
+    <Company>FirstLine Software</Company>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="DataTypes.fs" />
-    <Compile Include="Transforms.fs" />
+    <Compile Include="Composite.fs" />
+    <Compile Include="Seq.fs" />
+    <Compile Include="Comp.fs" />
+    <Compile Include="AccumulateTransformRule.fs"/>
     <Compile Include="CompositeExtensions.fs" />
-    <Compile Include="CheckTransformRule.fs"/>
     <Compile Include="EnumerableExtensions.fs" />
+    <Compile Include="C.fs" />
   </ItemGroup>
 
 </Project>

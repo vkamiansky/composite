@@ -7,3 +7,6 @@ before_build:
   
 build:
   verbosity: minimal
+
+before_deploy:
+  - dotnet pack Composite

@@ -25,5 +25,14 @@
         "typescript",
         "typescriptreact",
         "yml"
+    ],
+    "editor.renderWhitespace": "all",
+    "cSpell.words": [
+        "enumerables",
+        "failwith",
+        "funcs",
+        "linq",
+        "typeparam",
+        "xunit"
     ]
 }
