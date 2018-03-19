@@ -10,3 +10,11 @@ build:
 
 before_deploy:
   - dotnet pack Composite
+
+deploy:
+- provider: NuGet
+  server: NuGet.org
+  api_key:
+    secure: yTJOXDOWg52hjjJFxtJNqq0uRfi8pHiC2ilKFXsJoDT6XjM13bRgvSyYaf4z9wJe
+  on:
+    branch: master
