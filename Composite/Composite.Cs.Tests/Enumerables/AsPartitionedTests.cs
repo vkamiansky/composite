@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 
 using Composite;
+using Composite.Cs.Tests.Helpers;
 
 namespace Composite.Cs.Tests.Enumerables
 {
@@ -15,7 +16,7 @@ namespace Composite.Cs.Tests.Enumerables
         [Fact]
         public void PartitionsFormationTest()
         {
-            var inputSequence = Enumerable.Range(1, 10).AsLimited(6);
+            var inputSequence = Enumerable.Range(1, 10).AllowTake(6);
             var partitions = inputSequence.AsPartitioned(3);
 
             var arr1 = partitions[0].Take(2).ToArray();
@@ -44,7 +45,7 @@ namespace Composite.Cs.Tests.Enumerables
         [Fact]
         public void InvalidParametersTest()
         {
-            var inputSequence = Enumerable.Range(1, 10).AsLimited(0);
+            var inputSequence = Enumerable.Range(1, 10).AllowTake(0);
 
             Assert.Throws<ArgumentException>(() => inputSequence.AsPartitioned(0).ToArray());
             Assert.Throws<ArgumentException>(() => inputSequence.AsPartitioned(-1).ToArray());

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-using Composite.Cs.Tests.Enumerables;
+using Composite.Cs.Tests.Helpers;
 
 using Xunit;
 
@@ -28,7 +28,7 @@ namespace Composite.Cs.Tests.Composites
                                            ? 5
                                            : x.Number);
 
-            Assert.Equal("[ 4, 5, [ 4, 7 ], 8 ]", result.AsString(x => x.ToString()));
+            Assert.Equal("[ 4, 5, [ 4, 7 ], 8 ]", result.ToStringShort());
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Composite.Cs.Tests.Composites
                 C.Composite(new[] {
                     C.Value( new Simple { Number = 6, } ),
                     C.Value( new Simple { Number = 7, } ),
-                }.AsLimited(1)),
+                }.AllowTake(1)),
                 C.Value( new Simple { Number = 8, } ),
             });
 

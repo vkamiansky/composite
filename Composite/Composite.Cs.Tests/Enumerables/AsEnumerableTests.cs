@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 
 using Xunit;
+using Composite.Cs.Tests.Helpers;
 
 namespace Composite.Cs.Tests.Enumerables
 {
@@ -18,10 +19,10 @@ namespace Composite.Cs.Tests.Enumerables
                     C.Composite(new [] {
                         C.Value(new Simple { Number = 4, }),
                         C.Value(new Simple { Number = 5, }),
-                    }.AsLimited(1)),
+                    }.AllowTake(1)),
                 }),
                 C.Value(new Simple { Number = 6, }),
-            }.AsLimited(2));
+            }.AllowTake(2));
 
             var result = obj.AsEnumerable().Take(4).ToArray();
             for (int i = 1; i <= 4; i++)

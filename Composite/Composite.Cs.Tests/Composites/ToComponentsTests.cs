@@ -3,7 +3,7 @@ using System.Linq;
 
 using Xunit;
 
-using Composite.Cs.Tests.Enumerables;
+using Composite.Cs.Tests.Helpers;
 
 namespace Composite.Cs.Tests.Composites
 {
@@ -18,7 +18,7 @@ namespace Composite.Cs.Tests.Composites
                     C.Value(new Simple { Number = 6, }),
                 }),
                 C.Value(new Simple { Number = 2, }),
-            }.AsLimited(2));
+            }.AllowTake(2));
 
             obj.ToComponents().Take(2).ToArray();
 

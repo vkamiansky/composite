@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-using Composite.Cs.Tests.Enumerables;
+using Composite.Cs.Tests.Helpers;
 
 using Xunit;
 
@@ -19,7 +19,7 @@ namespace Composite.Cs.Tests.Composites
 
             var result = obj.Fork(x => x.Number == 1, _ => new[] { new Simple { Number = 4, }, new Simple { Number = 5, } });
 
-            Assert.Equal("[ [ 4, 5 ], 6 ]", result.AsString(x => x.Number.ToString()));
+            Assert.Equal("[ [ 4, 5 ], 6 ]", result.ToStringShort());
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Composite.Cs.Tests.Composites
                     C.Value(new Simple { Number = 1, }),
                     C.Value(new Simple { Number = 2, }),
                     C.Value(new Simple { Number = 3, })
-                }.AsLimited(2)),
+                }.AllowTake(2)),
                 C.Value( new Simple { Number = 6, } ),
             });
 
@@ -63,7 +63,7 @@ namespace Composite.Cs.Tests.Composites
 
             var forked = obj.Fork(
                 x => x.Number == 1,
-                _ => new[] { new Simple { Number = 4, }, new Simple { Number = 5, }, new Simple { Number = 6, } }.AsLimited(2));
+                _ => new[] { new Simple { Number = 4, }, new Simple { Number = 5, }, new Simple { Number = 6, } }.AllowTake(2));
 
             var result = forked.AsEnumerable()
                                .Take(2)
