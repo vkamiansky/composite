@@ -8,9 +8,9 @@ before_build:
 build:
   verbosity: minimal
 
-before_deploy:
+after_build:
   - dotnet pack Composite
-  
+
 artifacts:
 - path: '**\*.nupkg'
   name: NuGet
