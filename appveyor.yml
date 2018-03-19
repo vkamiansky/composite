@@ -9,7 +9,7 @@ build:
   verbosity: minimal
 
 after_build:
-  - dotnet pack Composite
+  - dotnet pack Composite --no-build
 
 artifacts:
 - path: '**\*.nupkg'

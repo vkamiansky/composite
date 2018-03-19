@@ -2,11 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <DocumentationFile>bin\Debug\netstandard2.0\Composite.xml</DocumentationFile>
+    <DocumentationFile>$(OutputPath)\netstandard2.0\Composite.xml</DocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
     <PackageId>Composite</PackageId>
+    <Title>Project Composite</Title>
     <Version>$(APPVEYOR_BUILD_VERSION)</Version>
     <Authors>Vitaly Kamiansky, Vladimir Ilin</Authors>
     <Company>FirstLine Software</Company>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/vkamiansky/composite/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/vkamiansky/composite</PackageProjectUrl>
+    <PackageTags>composite;seq;fsharp;enumerable;lazy;sequence</PackageTags>
+    <RepositoryUrl>https://github.com/vkamiansky/composite.git</RepositoryUrl>
+    <Description>Project Composite introduces extensions that make building sequence-based composite data processing solutions seamless and easy. It has interfaces specifically tailored for C# and F# use.</Description>
+    <Copyright>Copyright (c) 2018, Vitaly Kamiansky, Vladimir Ilin</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
