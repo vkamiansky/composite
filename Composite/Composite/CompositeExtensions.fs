@@ -46,3 +46,19 @@ type CompositeExtensions () =
     ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
     static member inline AsEnumerable (source: 'T Composite) =
         source |> Seq.ofComp |> Enumerable.AsEnumerable
+
+    [<Extension>]
+    ///<summary>Returns the enumerable of components of the input marked composite.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<typeparam name="TMark">The type of marks in the composite.</typeparam>
+    ///<typeparam name="TPayload">The type of payload objects in the composite.</typeparam>
+    static member inline ToComponents (source: Composite<'TMark, 'TPayload>) =
+        source |> MComp.components |> Enumerable.AsEnumerable
+
+    [<Extension>]
+    ///<summary>Views the given marked composite as an enumerable.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<typeparam name="TMark">The type of marks in the composite.</typeparam>
+    ///<typeparam name="TPayload">The type of payload objects in the composite.</typeparam>
+    static member inline AsEnumerable (source: Composite<'TMark, 'TPayload>) =
+        source |> Seq.ofMComp |> Enumerable.AsEnumerable
