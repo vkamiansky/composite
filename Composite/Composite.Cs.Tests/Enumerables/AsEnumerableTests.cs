@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 
 using Xunit;
-using Composite.Cs.Tests.Helpers;
+using Composite.Cs.Tests.Infrastructure;
 
 namespace Composite.Cs.Tests.Enumerables
 {

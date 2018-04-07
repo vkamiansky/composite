@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-using Composite.Cs.Tests.Helpers;
+using Composite.Cs.Tests.Infrastructure;
 
 using Xunit;
 
