@@ -36,11 +36,11 @@ namespace Composite.Cs.Tests.Infrastructure
         [Fact]
         public void MarkedTransformationTest()
         {
-            var inputComposite = C.MarkedComposite(new[] {
-                C.MarkedComposite(new[]{
-                    C.MarkedValue(new Simple { Number = 1, }, "mark")
-                }, "inner composite")
-            },"");
+            var inputComposite = C.MarkedComposite(string.Empty, new[] {
+                C.MarkedComposite("inner composite", new[]{
+                    C.MarkedValue("mark", new Simple { Number = 1, })
+                })
+            });
 
             Assert.Equal("[ ( inner composite )[ ( mark )1 ] ]", inputComposite.ToStringShort());
         }
@@ -48,22 +48,22 @@ namespace Composite.Cs.Tests.Infrastructure
         [Fact]
         public void MarkedTrivialParametersTest()
         {
-            var inputComposite = C.MarkedComposite(new Composite<string,int>[]{}, "");
+            var inputComposite = C.MarkedComposite(string.Empty, new Composite<string,int>[]{});
             Assert.Equal("[ ]", inputComposite.ToStringShort());
 
-            inputComposite = C.MarkedComposite(new Composite<string,int>[]{}, "mark");
+            inputComposite = C.MarkedComposite("mark", new Composite<string,int>[]{});
             Assert.Equal("( mark )[ ]", inputComposite.ToStringShort());
 
-            inputComposite = C.MarkedComposite(new[]{C.MarkedValue(1, "")}, "");
+            inputComposite = C.MarkedComposite(string.Empty, new[]{C.MarkedValue(string.Empty, 1)});
             Assert.Equal("[ 1 ]", inputComposite.ToStringShort());
 
-            inputComposite = C.MarkedComposite(new[]{C.MarkedValue(1, "mark")}, "");
+            inputComposite = C.MarkedComposite(string.Empty, new[]{C.MarkedValue("mark", 1)});
             Assert.Equal("[ ( mark )1 ]", inputComposite.ToStringShort());
 
-            inputComposite = C.MarkedValue(1, "");
+            inputComposite = C.MarkedValue(string.Empty, 1);
             Assert.Equal("1", inputComposite.ToStringShort());
 
-            inputComposite = C.MarkedValue(1, "mark");
+            inputComposite = C.MarkedValue("mark", 1);
             Assert.Equal("( mark )1", inputComposite.ToStringShort());
         }
     }

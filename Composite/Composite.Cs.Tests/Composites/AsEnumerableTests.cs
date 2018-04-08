@@ -4,7 +4,7 @@ using System.Linq;
 using Xunit;
 using Composite.Cs.Tests.Infrastructure;
 
-namespace Composite.Cs.Tests.Enumerables
+namespace Composite.Cs.Tests.Composites
 {
     public class AsEnumerableTests
     {

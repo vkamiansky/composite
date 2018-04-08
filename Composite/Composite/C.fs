@@ -24,7 +24,7 @@ module C =
     ///<typeparam name="TMark">The type of mark.</typeparam>
     ///<typeparam name="TPayload">The type of payload objects in the composite.</typeparam>
     ///<exception cref="System.ArgumentNullException">Thrown when <c>components</c> is null.</exception>
-    let MarkedComposite (components: IEnumerable<Composite<'TMark, 'TPayload>>) (mark: 'TMark) =
+    let MarkedComposite (mark: 'TMark) (components: IEnumerable<Composite<'TMark, 'TPayload>>) =
         if components |> isNull
         then nullArg "components"
         else MarkedComposite {Mark = mark; Components = components}
@@ -34,5 +34,5 @@ module C =
     ///<param name="mark">The mark.</param>
     ///<typeparam name="TMark">The type of the mark.</typeparam>
     ///<typeparam name="TPayload">The type of the payload object.</typeparam>
-    let MarkedValue (value: 'TPayload) (mark: 'TMark) =
+    let MarkedValue (mark: 'TMark) (value: 'TPayload) =
         MarkedValue {Mark = mark; Value = value}

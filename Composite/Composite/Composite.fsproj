@@ -23,6 +23,7 @@
     <Compile Include="Seq.fs" />
     <Compile Include="Comp.fs" />
     <Compile Include="MComp.fs" />
+    <Compile Include="MarkedComposite.fs" />
     <Compile Include="AccumulateTransformRule.fs"/>
     <Compile Include="CompositeExtensions.fs" />
     <Compile Include="EnumerableExtensions.fs" />
