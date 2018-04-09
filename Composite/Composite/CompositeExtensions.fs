@@ -65,12 +65,23 @@ type CompositeExtensions () =
 
     [<Extension>]
     ///<summary>Builds a new marked composite based on the source in which the value is set at the given mark in the given container.</summary>
+    ///<param name="source">The input composite.</param>
     ///<param name="containerMark">The mark of the container in which the value should be set.</param>
     ///<param name="valueMark">The mark to set the value at.</param>
     ///<param name="value">The value to set.</param>
     ///<param name="markComparer">The function used to determine if two marks match.</param>
-    ///<param name="source">The input composite.</param>
     ///<typeparam name="TMark">The type of marks in the composite.</typeparam>
     ///<typeparam name="TPayload">The type of payload objects in the composite.</typeparam>
     static member inline SetValue (source: Composite<'TMark, 'TPayload>) (containerMark: 'TMark) (valueMark: 'TMark) (value: 'TPayload) (markComparer: Func<'TMark,'TMark,bool>) =
         source |> MComp.setValue containerMark valueMark value (fun x1 x2-> markComparer.Invoke(x1, x2))
+
+    [<Extension>]
+    ///<summary>Builds a new marked composite based on the source ensuring that a container will be present at the given mark in the given container.</summary>
+    ///<param name="source">The input composite.</param>
+    ///<param name="outerContainerMark">The mark of the container in which the container should be found.</param>
+    ///<param name="innerContainerMark">The mark to the container of which the presence is to be ensured.</param>
+    ///<param name="markComparer">The function used to determine if two marks match.</param>
+    ///<typeparam name="TMark">The type of marks in the composite.</typeparam>
+    ///<typeparam name="TPayload">The type of payload objects in the composite.</typeparam>
+    static member inline EnsureHasContainer (source: Composite<'TMark, 'TPayload>) (outerContainerMark: 'TMark) (innerContainerMark: 'TMark) (markComparer: Func<'TMark,'TMark,bool>) =
+        source |> MComp.ensureHasContainer outerContainerMark innerContainerMark (fun x1 x2-> markComparer.Invoke(x1, x2))
