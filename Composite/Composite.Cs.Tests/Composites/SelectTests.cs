@@ -12,14 +12,14 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void TransformationTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value( new Simple { Number = 1, } ),
-                C.Value( new Simple { Number = 6, } ),
-                C.Composite(new[] {
-                    C.Value( new Simple { Number = 1, } ),
-                    C.Value( new Simple { Number = 7, } ),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue( new Simple { Number = 1, } ),
+                Composite.CreateValue( new Simple { Number = 6, } ),
+                Composite.Create(new[] {
+                    Composite.CreateValue( new Simple { Number = 1, } ),
+                    Composite.CreateValue( new Simple { Number = 7, } ),
                 }),
-                C.Value( new Simple { Number = 8, } ),
+                Composite.CreateValue( new Simple { Number = 8, } ),
             });
 
             var result = obj.Select(x => x.Number == 1
@@ -34,13 +34,13 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void LazyInputTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value( new Simple { Number = 1, } ),
-                C.Composite(new[] {
-                    C.Value( new Simple { Number = 6, } ),
-                    C.Value( new Simple { Number = 7, } ),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue( new Simple { Number = 1, } ),
+                Composite.Create(new[] {
+                    Composite.CreateValue( new Simple { Number = 6, } ),
+                    Composite.CreateValue( new Simple { Number = 7, } ),
                 }.AllowTake(1)),
-                C.Value( new Simple { Number = 8, } ),
+                Composite.CreateValue( new Simple { Number = 8, } ),
             });
 
             var baseQuery = obj.Select(x => x.Number == 1 ? 4 : x.Number == 6 ? 5 : x.Number);
@@ -58,7 +58,7 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void InvalidParametersTest()
         {
-            var obj = C.Composite(new[] { C.Value(new Simple()), });
+            var obj = Composite.Create(new[] { Composite.CreateValue(new Simple()), });
 
             Assert.Throws<ArgumentNullException>(() => obj.Select<Simple, int>(null));
         }

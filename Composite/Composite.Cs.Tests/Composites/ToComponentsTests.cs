@@ -11,13 +11,13 @@ namespace Composite.Cs.Tests.Composites
     {
         [Fact]
         public void LazyOutputTest(){
-            var obj = C.Composite (new [] {
-                C.Value(new Simple { Number = 2, }),
-                C.Composite(new [] {
-                    C.Value(new Simple { Number = 1, }),
-                    C.Value(new Simple { Number = 6, }),
+            var obj = Composite.Create (new [] {
+                Composite.CreateValue(new Simple { Number = 2, }),
+                Composite.Create(new [] {
+                    Composite.CreateValue(new Simple { Number = 1, }),
+                    Composite.CreateValue(new Simple { Number = 6, }),
                 }),
-                C.Value(new Simple { Number = 2, }),
+                Composite.CreateValue(new Simple { Number = 2, }),
             }.AllowTake(2));
 
             obj.ToComponents().Take(2).ToArray();

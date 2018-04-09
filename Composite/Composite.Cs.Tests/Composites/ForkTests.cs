@@ -12,9 +12,9 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void TransformationTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value( new Simple { Number = 1, } ),
-                C.Value( new Simple { Number = 6, } ),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue( new Simple { Number = 1, } ),
+                Composite.CreateValue( new Simple { Number = 6, } ),
             });
 
             var result = obj.Fork(x => x.Number == 1, _ => new[] { new Simple { Number = 4, }, new Simple { Number = 5, } });
@@ -25,14 +25,14 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void LazyInputTest()
         {
-            var obj = C.Composite(new[] {
-                C.Composite(new[]
+            var obj = Composite.Create(new[] {
+                Composite.Create(new[]
                 {
-                    C.Value(new Simple { Number = 1, }),
-                    C.Value(new Simple { Number = 2, }),
-                    C.Value(new Simple { Number = 3, })
+                    Composite.CreateValue(new Simple { Number = 1, }),
+                    Composite.CreateValue(new Simple { Number = 2, }),
+                    Composite.CreateValue(new Simple { Number = 3, })
                 }.AllowTake(2)),
-                C.Value( new Simple { Number = 6, } ),
+                Composite.CreateValue( new Simple { Number = 6, } ),
             });
 
             var baseQuery = obj.Fork(
@@ -56,9 +56,9 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void LazyOutputTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value( new Simple { Number = 1, } ),
-                C.Value( new Simple { Number = 6, } ),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue( new Simple { Number = 1, } ),
+                Composite.CreateValue( new Simple { Number = 6, } ),
             });
 
             var forked = obj.Fork(
@@ -78,9 +78,9 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void PredicateCallTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value( new Simple { Number = 1, } ),
-                C.Value( new Simple { Number = 6, } ),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue( new Simple { Number = 1, } ),
+                Composite.CreateValue( new Simple { Number = 6, } ),
             });
 
             var forked = obj.Fork(
@@ -95,9 +95,9 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void InvalidParametersTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value(new Simple()),
-                C.Value(new Simple()),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue(new Simple()),
+                Composite.CreateValue(new Simple()),
             });
 
             Assert.Throws<ArgumentNullException>(() => obj.Fork(null, null));

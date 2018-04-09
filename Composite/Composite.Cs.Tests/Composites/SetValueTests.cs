@@ -11,9 +11,9 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void TransformationTest()
         {
-            var obj = C.MarkedComposite(string.Empty, new[] {
-                C.MarkedComposite("inner composite", new[]{
-                    C.MarkedValue("mark", new Simple { Number = 1, })
+            var obj = MarkedComposite.Create(string.Empty, new[] {
+                MarkedComposite.Create("inner composite", new[]{
+                    MarkedComposite.CreateValue("mark", new Simple { Number = 1, })
                 })
             });
 
@@ -37,7 +37,7 @@ namespace Composite.Cs.Tests.Composites
         [Fact]
         public void TrivialCaseTest()
         {
-            var obj = C.MarkedValue("mark", new Simple { Number = 1, });
+            var obj = MarkedComposite.CreateValue("mark", new Simple { Number = 1, });
 
             var result = obj.SetValue(
                 string.Empty,

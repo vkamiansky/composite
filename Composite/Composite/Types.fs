@@ -3,6 +3,23 @@ namespace Composite
 open System
 open System.Collections.Generic
 
+    ///<summary>Represents a generic marked value.</summary>
+    type MarkValuePair<'TMark, 'TValue> = {Mark: 'TMark; Value: 'TValue}
+
+    ///<summary>Represents a generic marked sequence.</summary>
+    type MarkComponentsPair<'TMark, 'TComponent> = {Mark: 'TMark; Components: seq<'TComponent>}
+
+    ///<summary>Represents a generic sequence composite.</summary>
+    type 'T Composite =
+        | Value of 'T
+        | Composite of seq<Composite<'T>>
+
+    ///<summary>Represents a generic marked sequence composite.</summary>
+    type Composite<'TMark,'TPayload> =
+        | MarkedValue of MarkValuePair<'TMark, 'TPayload>
+        | MarkedComposite of MarkComponentsPair<'TMark, Composite<'TMark,'TPayload>>
+
+
     ///<summary>Represents a set of functions used to find objects, accumulate them in an array, and then transform the accumulated objects into an output enumerable.</summary>
     type AccumulateTransformRule<'TSource, 'TResult> =
 
