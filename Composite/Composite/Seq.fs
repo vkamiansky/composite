@@ -15,6 +15,15 @@ module Seq =
                | Composite x -> yield! x |> Seq.collect ofComp
         }
 
+    ///<summary>Views the given marked composite as a sequence of mark value pairs.</summary>
+    ///<param name="source">The input composite.</param>
+    let rec ofMComp (source: Composite<'TMark,'TPayload>) =
+       seq {
+            match source with
+               | MarkedValue x -> yield x
+               | MarkedComposite x -> yield! x.Components |> Seq.collect ofMComp
+        }
+
     ///<summary>Creates a function to fetch elements from the input sequence.</summary>
     ///<param name="source">The input sequence.</param>
     ///<exception cref="System.ArgumentNullException">Thrown when <c>source</c> is null.</exception>

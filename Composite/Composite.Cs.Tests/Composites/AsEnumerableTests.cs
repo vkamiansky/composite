@@ -4,24 +4,24 @@ using System.Linq;
 using Xunit;
 using Composite.Cs.Tests.Infrastructure;
 
-namespace Composite.Cs.Tests.Enumerables
+namespace Composite.Cs.Tests.Composites
 {
     public class AsEnumerableTests
     {
         [Fact]
         public void AsEnumerableTest()
         {
-            var obj = C.Composite(new[] {
-                C.Value(new Simple { Number = 1, }),
-                C.Composite(new [] {
-                    C.Value(new Simple { Number = 2, }),
-                    C.Value(new Simple { Number = 3, }),
-                    C.Composite(new [] {
-                        C.Value(new Simple { Number = 4, }),
-                        C.Value(new Simple { Number = 5, }),
+            var obj = Composite.Create(new[] {
+                Composite.CreateValue(new Simple { Number = 1, }),
+                Composite.Create(new [] {
+                    Composite.CreateValue(new Simple { Number = 2, }),
+                    Composite.CreateValue(new Simple { Number = 3, }),
+                    Composite.Create(new [] {
+                        Composite.CreateValue(new Simple { Number = 4, }),
+                        Composite.CreateValue(new Simple { Number = 5, }),
                     }.AllowTake(1)),
                 }),
-                C.Value(new Simple { Number = 6, }),
+                Composite.CreateValue(new Simple { Number = 6, }),
             }.AllowTake(2));
 
             var result = obj.AsEnumerable().Take(4).ToArray();

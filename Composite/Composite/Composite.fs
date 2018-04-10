@@ -1,5 +1,20 @@
 namespace Composite
 
-    type 'T Composite =
-        | Value of 'T
-        | Composite of seq<Composite<'T>>
+open System.Collections.Generic
+
+module Composite =
+
+    ///<summary>Instantiates a new composite variant of <c>Composite&lt;T&gt;</c>.</summary>
+    ///<param name="components">An enumerable of components to wrap in a new composite.</param>
+    ///<typeparam name="T">The type of payload objects in the composite.</typeparam>
+    ///<exception cref="System.ArgumentNullException">Thrown when <c>components</c> is null.</exception>
+    let Create (components: IEnumerable<'T Composite>) =
+        if components |> isNull
+        then nullArg "components"
+        else Composite components
+
+    ///<summary>Instantiates a new value variant of <c>Composite&lt;T&gt;</c>.</summary>
+    ///<param name="value">The payload object.</param>
+    ///<typeparam name="T">The type of the payload object.</typeparam>
+    let CreateValue (value: 'T) =
+        Value value
