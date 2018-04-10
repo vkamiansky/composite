@@ -1,6 +1,6 @@
  # composite
 
-[![Build status](https://ci.appveyor.com/api/projects/status/51ll2t40ae4mhtaf/branch/master?svg=true)](https://ci.appveyor.com/project/vkamiansky/composite)
+[![Build status](https://ci.appveyor.com/api/projects/status/51ll2t40ae4mhtaf/branch/master?svg=true)](https://ci.appveyor.com/project/vkamiansky/composite) ![Latest Nuget version](https://img.shields.io/nuget/v/Composite.svg)
 
 [A *sequence* is a logical series of elements all of one type](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/sequences). The definition of a sequence has no stipulation of how its elements are stored, or linked, or whether they are stored at all. In C# sequences are called enumerable collections, they implement `IEnumerable<T>`. In F# they are represented by the `seq<T>` type.
 
