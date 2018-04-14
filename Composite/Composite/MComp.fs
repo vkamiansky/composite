@@ -38,7 +38,7 @@ module MComp =
                                             match c with
                                             | MarkedValue y -> if y.Mark |> markComparer valueMark then
                                                                     valueFound <- true
-                                                                    yield MarkedValue {Mark = y.Mark; Value = value}
+                                                                    yield MarkedValue {Mark = valueMark; Value = value}
                                                                else yield c
                                             | c -> yield c
                                         if not valueFound then yield MarkedValue {Mark = valueMark; Value = value}
